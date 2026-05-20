@@ -69,6 +69,23 @@
   .pct-high { color: #c0392b; font-weight: 700; }
   .pct-mid  { color: #e67e22; font-weight: 600; }
 
+  /* IPO Events table */
+  .ipo-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .ipo-table th { background: #0f2d52; color: #fff; padding: 10px 14px;
+    text-align: left; font-weight: 600; font-size: 12px; }
+  .ipo-table td { padding: 9px 14px; border-bottom: 1px solid #edf2f7; vertical-align: top; }
+  .ipo-table tr:nth-child(even) td { background: #f7fafc; }
+  .ipo-table tr.peak td { background: #fff3cd; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 600; }
+  .badge-blue   { background: #dbeafe; color: #1e40af; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-green  { background: #d1fae5; color: #065f46; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-orange { background: #ffedd5; color: #9a3412; }
+  .badge-gray   { background: #f3f4f6; color: #374151; }
+  .unverified { font-size: 11px; color: #9ca3af; font-style: italic; }
+
   /* Footer */
   .footer { text-align: center; font-size: 11px; color: #a0aec0; margin-top: 40px; }
 </style>
@@ -164,6 +181,100 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- IPO Events -->
+  <div class="card">
+    <div class="card-title">新股事件对照表</div>
+    <div class="card-desc">⚠️ 带 * 标注为推测关联，需结合 moomoo MY 实际上架记录确认</div>
+    <table class="ipo-table">
+      <thead>
+        <tr>
+          <th>时间</th>
+          <th>股票</th>
+          <th>代码 / 交易所</th>
+          <th>当月工单</th>
+          <th>备注</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2025年3月 *</td>
+          <td>CoreWeave</td>
+          <td><span class="badge badge-blue">CRWV / Nasdaq</span></td>
+          <td>2</td>
+          <td class="unverified">AI算力公司，3月28日上市，Nvidia背书；需确认是否在 moomoo MY 上架</td>
+        </tr>
+        <tr>
+          <td>2025年8月</td>
+          <td>Bullish</td>
+          <td><span class="badge badge-purple">— / —</span></td>
+          <td>29</td>
+          <td>加密交易所，moomoo 认购 $2.25 亿</td>
+        </tr>
+        <tr>
+          <td>2025年9月</td>
+          <td>多只新股</td>
+          <td><span class="badge badge-gray">—</span></td>
+          <td>53</td>
+          <td>Instagram 帖子显示"多只IPO同时开放"，峰值月（开户前咨询同达 973 单）</td>
+        </tr>
+        <tr>
+          <td>2025年7月 *</td>
+          <td>Figma</td>
+          <td><span class="badge badge-blue">FIG / NYSE</span></td>
+          <td>5</td>
+          <td class="unverified">设计工具独角兽，7月31日上市，$33/股；需确认是否在 moomoo MY 上架</td>
+        </tr>
+        <tr>
+          <td>2025年12月17日</td>
+          <td>Medline</td>
+          <td><span class="badge badge-blue">MDLN / Nasdaq</span></td>
+          <td>16</td>
+          <td>美国最大医疗用品商之一</td>
+        </tr>
+        <tr>
+          <td>2026年1月23日</td>
+          <td>BitGo</td>
+          <td><span class="badge badge-blue">BTGO / NYSE</span></td>
+          <td>4</td>
+          <td>首只加密 IPO，moomoo 占 10% 配额，100% 中签</td>
+        </tr>
+        <tr class="peak">
+          <td>2026年2月 ⚠️ *</td>
+          <td>Veradermics</td>
+          <td><span class="badge badge-red">MANE / Nasdaq</span></td>
+          <td><strong>176（峰值）</strong></td>
+          <td>2/4 上市，首日暴涨 <strong>+271%</strong>，可能是当月咨询激增主因；需确认是否在 moomoo MY 上架</td>
+        </tr>
+        <tr>
+          <td>2026年3月 *</td>
+          <td>MiniMed Group</td>
+          <td><span class="badge badge-blue">MMED / Nasdaq</span></td>
+          <td>33</td>
+          <td class="unverified">3/6 上市，医疗健康，跌 25%；需确认是否在 moomoo MY 上架</td>
+        </tr>
+        <tr>
+          <td>2026年4月17日</td>
+          <td>AEVEX Corp</td>
+          <td><span class="badge badge-blue">AVEX / NYSE</span></td>
+          <td>11</td>
+          <td>国防承包商，上市涨 <strong>+34%</strong>（数据来源显示实涨幅高于最初报告的 15%）</td>
+        </tr>
+        <tr>
+          <td>2026年5月19日</td>
+          <td>Cerebras Systems</td>
+          <td><span class="badge badge-orange">CBRS / —</span></td>
+          <td>10</td>
+          <td>AI 芯片，IPO 价 $185，声称比 NVDA 快 20 倍</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:#9ca3af;margin-top:12px">
+      * 推测关联基于上市时间与工单峰值吻合，实际需对照 moomoo MY 后台上架记录核实。
+      数据来源：<a href="https://www.iposcoop.com/current-year-pricings/" target="_blank" style="color:#2e75b6">IPOScoop</a>、
+      <a href="https://dealroom.net/blog/upcoming-recent-ipos" target="_blank" style="color:#2e75b6">Dealroom</a>
+    </p>
   </div>
 
   <!-- Data table -->
