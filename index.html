@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新股申购咨询分析报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background: #f0f4f8; color: #1a202c; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #0f2d52 0%, #1a5276 100%);
+    border-radius: 16px; padding: 36px 40px; margin-bottom: 28px; color: #fff; }
+  .header-tag { font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: #7fb3d3; margin-bottom: 10px; }
+  .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .header-sub { font-size: 14px; color: #acd0e8; }
+  .header-meta { margin-top: 18px; display: flex; gap: 24px; }
+  .header-meta span { font-size: 12px; color: #7fb3d3; }
+  .header-meta strong { color: #fff; }
+
+  /* KPI cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .kpi { background: #fff; border-radius: 12px; padding: 22px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08); border-top: 4px solid #2e75b6; }
+  .kpi.red   { border-top-color: #c0392b; }
+  .kpi.green { border-top-color: #27ae60; }
+  .kpi.orange{ border-top-color: #e67e22; }
+  .kpi-label { font-size: 11px; color: #718096; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 8px; }
+  .kpi-value { font-size: 32px; font-weight: 700; color: #1a202c; line-height: 1; }
+  .kpi-sub   { font-size: 12px; color: #a0aec0; margin-top: 6px; }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 14px; padding: 28px 28px 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 24px; }
+  .card-title { font-size: 15px; font-weight: 700; color: #0f2d52; margin-bottom: 6px; }
+  .card-desc  { font-size: 12px; color: #718096; margin-bottom: 20px; }
+
+  /* Chart container */
+  .chart-wrap { position: relative; }
+
+  /* Two-col layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+  /* Insights */
+  .insights { display: flex; flex-direction: column; gap: 14px; }
+  .insight-item { display: flex; gap: 14px; align-items: flex-start; }
+  .insight-dot  { width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 4px; }
+  .dot-blue   { background: #2e75b6; }
+  .dot-red    { background: #c0392b; }
+  .dot-green  { background: #27ae60; }
+  .dot-orange { background: #e67e22; }
+  .insight-text strong { font-size: 13px; color: #1a202c; display: block; margin-bottom: 2px; }
+  .insight-text p { font-size: 12px; color: #718096; line-height: 1.6; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #0f2d52; color: #fff; padding: 10px 14px; text-align: center;
+    font-weight: 600; font-size: 12px; }
+  td { padding: 9px 14px; text-align: center; border-bottom: 1px solid #edf2f7; }
+  tr:nth-child(even) td { background: #f7fafc; }
+  tr.highlight td { background: #fff8e1; font-weight: 600; }
+  tr.total td { background: #ebf5fb; font-weight: 700; border-top: 2px solid #2e75b6; }
+  .pct-high { color: #c0392b; font-weight: 700; }
+  .pct-mid  { color: #e67e22; font-weight: 600; }
+
+  /* Footer */
+  .footer { text-align: center; font-size: 11px; color: #a0aec0; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-tag">客服数据分析报告</div>
+    <h1>新股申购咨询量分析</h1>
+    <div class="header-sub">渠道来源趋势 · 对开户前咨询量的影响研究</div>
+    <div class="header-meta">
+      <span>数据周期：<strong>2024年11月 — 2026年5月</strong></span>
+      <span>数据来源：<strong>灯塔 · 工单系统</strong></span>
+      <span>更新日期：<strong>2026年5月20日</strong></span>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">新股申购累计工单</div>
+      <div class="kpi-value">364</div>
+      <div class="kpi-sub">2024-11 至 2026-05</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">单月峰值</div>
+      <div class="kpi-value">176</div>
+      <div class="kpi-sub">2026年2月（同比激增）</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">峰值月占比</div>
+      <div class="kpi-value">104%</div>
+      <div class="kpi-sub">超过当月开户前咨询总量</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">开户前咨询累计</div>
+      <div class="kpi-value">5,217</div>
+      <div class="kpi-sub">同期对照基准</div>
+    </div>
+  </div>
+
+  <!-- Main combo chart -->
+  <div class="card">
+    <div class="card-title">月度趋势：新股申购 vs 开户前咨询</div>
+    <div class="card-desc">柱状图为开户前咨询量（左轴），折线为新股申购量（右轴）</div>
+    <div class="chart-wrap" style="height:320px">
+      <canvas id="comboChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Two column: ratio chart + insights -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">新股申购占开户前咨询比例</div>
+      <div class="card-desc">每月新股申购量 ÷ 开户前咨询量</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="ratioChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">关键洞察</div>
+      <div class="card-desc">数据驱动的业务发现</div>
+      <div class="insights">
+        <div class="insight-item">
+          <div class="insight-dot dot-blue"></div>
+          <div class="insight-text">
+            <strong>新产品驱动咨询激增</strong>
+            <p>2025-09 新股申购达 53 单，同月开户前咨询也攀升至峰值 973 单，两者高度联动，推测与特定新股上市活动相关。</p>
+          </div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-dot dot-red"></div>
+          <div class="insight-text">
+            <strong>2026年2月异常峰值</strong>
+            <p>新股申购单月达 176 单，占开户前咨询 104%，超过开户前咨询总量，显示有大批客户专门因新股咨询进线。</p>
+          </div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-dot dot-orange"></div>
+          <div class="insight-text">
+            <strong>咨询量与新股事件强相关</strong>
+            <p>无新股活动月份（2024-12、2025-06、2025-11）新股申购工单为 0，印证咨询量完全受新股事件驱动。</p>
+          </div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-dot dot-green"></div>
+          <div class="insight-text">
+            <strong>建议提前备战</strong>
+            <p>新股活动前可提前准备 FAQ、增援客服资源，重点在马来西亚在线组与邮件组，占 90% 以上工单。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data table -->
+  <div class="card">
+    <div class="card-title">月度明细数据</div>
+    <div class="card-desc">完整月度数据，蓝底为高占比月份</div>
+    <table>
+      <thead>
+        <tr>
+          <th>月份</th>
+          <th>开户前咨询量</th>
+          <th>新股申购量</th>
+          <th>新股申购占比</th>
+          <th>备注</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">本报告由灯塔数据自动生成 · 仅供内部参考</div>
+</div>
+
+<script>
+const months = ['2024-11','2024-12','2025-01','2025-02','2025-03','2025-04',
+                 '2025-05','2025-06','2025-07','2025-08','2025-09','2025-10',
+                 '2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
+const pre  = [194,144,171,219,311,362,243,195,206,439,973,478,204,210,228,169,156,175,140];
+const ipo  = [4,0,1,2,2,10,4,0,5,29,53,4,0,16,4,176,33,11,10];
+const ratio = months.map((_, i) => pre[i] > 0 ? +(ipo[i]/pre[i]*100).toFixed(1) : 0);
+
+const notes = {
+  '2025-09': '开户前咨询峰值月',
+  '2026-02': '新股申购峰值月 ⚠️',
+  '2025-08': '申购量明显上升',
+  '2025-04': '马来西亚邮件组集中进线',
+};
+
+// Table
+const tbody = document.getElementById('tableBody');
+let tPre = 0, tIpo = 0;
+months.forEach((m, i) => {
+  tPre += pre[i]; tIpo += ipo[i];
+  const r = ratio[i];
+  const isHighlight = ipo[i] >= 29;
+  const tr = document.createElement('tr');
+  if (isHighlight) tr.className = 'highlight';
+  const pctClass = r >= 50 ? 'pct-high' : r >= 10 ? 'pct-mid' : '';
+  tr.innerHTML = `
+    <td>${m}</td>
+    <td>${pre[i].toLocaleString()}</td>
+    <td>${ipo[i] > 0 ? ipo[i] : '—'}</td>
+    <td class="${pctClass}">${ipo[i] > 0 ? r + '%' : '—'}</td>
+    <td style="text-align:left;color:#718096;font-size:11px">${notes[m] || ''}</td>`;
+  tbody.appendChild(tr);
+});
+const totRow = document.createElement('tr');
+totRow.className = 'total';
+const totPct = (tIpo/tPre*100).toFixed(1);
+totRow.innerHTML = `<td>合计</td><td>${tPre.toLocaleString()}</td><td>${tIpo}</td><td>${totPct}%</td><td></td>`;
+tbody.appendChild(totRow);
+
+// Combo chart
+const ctx1 = document.getElementById('comboChart').getContext('2d');
+new Chart(ctx1, {
+  data: {
+    labels: months,
+    datasets: [
+      {
+        type: 'bar',
+        label: '开户前咨询',
+        data: pre,
+        backgroundColor: 'rgba(46,117,182,0.75)',
+        borderColor: '#2e75b6',
+        borderWidth: 1,
+        yAxisID: 'y',
+        order: 2,
+      },
+      {
+        type: 'line',
+        label: '新股申购',
+        data: ipo,
+        borderColor: '#c0392b',
+        backgroundColor: 'rgba(192,57,43,0.15)',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointBackgroundColor: '#c0392b',
+        fill: true,
+        tension: 0.3,
+        yAxisID: 'y1',
+        order: 1,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'top', labels: { font: { size: 12 }, padding: 16 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} 单`
+        }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: {
+        type: 'linear', position: 'left',
+        title: { display: true, text: '开户前咨询（单）', font: { size: 11 } },
+        grid: { color: '#edf2f7' },
+        ticks: { font: { size: 11 } }
+      },
+      y1: {
+        type: 'linear', position: 'right',
+        title: { display: true, text: '新股申购（单）', font: { size: 11 } },
+        grid: { drawOnChartArea: false },
+        ticks: { font: { size: 11 } }
+      }
+    }
+  }
+});
+
+// Ratio chart
+const ctx2 = document.getElementById('ratioChart').getContext('2d');
+new Chart(ctx2, {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [{
+      label: '占比 (%)',
+      data: ratio,
+      borderColor: '#e67e22',
+      backgroundColor: 'rgba(230,126,34,0.12)',
+      borderWidth: 2.5,
+      pointRadius: 4,
+      pointBackgroundColor: ratio.map(r => r >= 50 ? '#c0392b' : r >= 10 ? '#e67e22' : '#e67e22'),
+      fill: true,
+      tension: 0.3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => `占比: ${ctx.parsed.y}%` } }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+      y: {
+        grid: { color: '#edf2f7' },
+        ticks: { font: { size: 10 }, callback: v => v + '%' },
+        title: { display: true, text: '新股申购 / 开户前咨询', font: { size: 10 } }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
