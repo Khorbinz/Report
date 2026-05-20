@@ -89,8 +89,8 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
 <div class="kpi-grid">
   <div class="kpi purple">
     <div class="kpi-label">全渠道累计接触量</div>
-    <div class="kpi-value">285,271</div>
-    <div class="kpi-sub">工单 + 在线接待 + 电话接通</div>
+    <div class="kpi-value">229,398</div>
+    <div class="kpi-sub">在线 + 电话 + 邮件（含部分月工单估算）</div>
   </div>
   <div class="kpi red">
     <div class="kpi-label">新股申购峰值月</div>
@@ -99,8 +99,8 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
   </div>
   <div class="kpi orange">
     <div class="kpi-label">全渠道单月峰值</div>
-    <div class="kpi-value">32,173</div>
-    <div class="kpi-sub">2025年9月（多只新股同开）</div>
+    <div class="kpi-value">25,774</div>
+    <div class="kpi-sub">2025年9月（在线18,653 + 电话3,301 + 邮件3,820）</div>
   </div>
   <div class="kpi green">
     <div class="kpi-label">开户前咨询累计</div>
@@ -112,11 +112,13 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
 <!-- Main chart: all 4 series -->
 <div class="card">
   <div class="card-title">全渠道工单总量 与 各分类咨询量趋势对比</div>
-  <div class="card-desc">灰色柱为全渠道合计（工单系统 + 在线接待量 + 电话接通，左轴）；折线为新股申购与开户前咨询（工单系统，右轴）。注：2024-11~2025-04 及 2026-05 仅含工单数据</div>
+  <div class="card-desc">堆叠柱为三渠道量（在线接待 + 电话接通 + 邮件咨询，左轴）；折线为新股申购与开户前咨询工单数（右轴）。注：2024-11~2025-04 及 2026-05 数据不完整仅供参考</div>
   <div class="legend-box">
-    <div class="legend-item"><div class="legend-bar" style="background:#94a3b8"></div> 全渠道总量</div>
-    <div class="legend-item"><div class="legend-color" style="background:#2e75b6;height:3px"></div> 开户前咨询</div>
-    <div class="legend-item"><div class="legend-color" style="background:#c0392b;height:3px"></div> 新股申购</div>
+    <div class="legend-item"><div class="legend-bar" style="background:rgba(46,117,182,0.7)"></div> 在线接待</div>
+    <div class="legend-item"><div class="legend-bar" style="background:rgba(230,126,34,0.75)"></div> 电话接通</div>
+    <div class="legend-item"><div class="legend-bar" style="background:rgba(39,174,96,0.7)"></div> 邮件咨询</div>
+    <div class="legend-item"><div class="legend-color" style="background:#1a202c;height:2px"></div> 开户前咨询（工单）</div>
+    <div class="legend-item"><div class="legend-color" style="background:#c0392b;height:3px"></div> 新股申购（工单）</div>
   </div>
   <div style="position:relative;height:340px">
     <canvas id="mainChart"></canvas>
@@ -264,10 +266,13 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
 const months  = ['2024-11','2024-12','2025-01','2025-02','2025-03','2025-04',
                  '2025-05','2025-06','2025-07','2025-08','2025-09','2025-10',
                  '2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
-// 全渠道 = 工单系统 + 在线接待量(lighthouse) + 电话接通量
-// 2024-11~2025-04 及 2026-05 仅有工单数据，其余月份为三源合计
-const total   = [3885,4198,5164,5754,7077,6905,15221,14995,19574,23414,32173,27186,20046,18833,20008,20386,18735,17035,4682];
-const woOnly  = [3885,4198,5164,5754,7077,6905,5855,5739,7048,8066,10219,9963,7791,7783,7722,8289,7082,6556,4682]; // 工单系统单独
+// 三渠道独立数据（0 = 当月无数据）
+const onlineD = [0,0,0,0,0,0,5749,5816,7443,10484,18653,13202,8957,7861,8196,7969,6806,6662,0];
+const phoneD  = [0,0,0,0,0,0,3617,3440,5083,4864,3301,4021,3298,3189,4090,4128,4847,3817,0];
+const emailD  = [0,0,0,0,0,0,1660,2245,3286,3360,3820,4710,2709,3314,2957,2601,2674,2904,0];
+// 全渠道合计（2025-05~2026-04 为三渠道之和；其余月份仅工单，标 *）
+const total   = [3885,4198,5164,5754,7077,6905,11026,11501,15812,18708,25774,21933,14964,14364,15243,14698,14327,13383,4682];
+const woOnly  = [3885,4198,5164,5754,7077,6905,5855,5739,7048,8066,10219,9963,7791,7783,7722,8289,7082,6556,4682];
 const pre     = [194,144,171,219,311,362,243,195,206,439,973,478,204,210,228,169,156,175,140];
 const ipo     = [4,0,1,2,2,10,4,0,5,29,53,4,0,16,4,176,33,11,10];
 
@@ -303,14 +308,18 @@ new Chart(ctx1, {
   data: {
     labels: months,
     datasets: [
-      { type:'bar', label:'全渠道总量', data:total,
-        backgroundColor:'rgba(148,163,184,0.55)', borderColor:'#94a3b8',
-        borderWidth:1, yAxisID:'y', order:3 },
+      { type:'bar', label:'在线接待', data:onlineD,
+        backgroundColor:'rgba(46,117,182,0.7)', yAxisID:'y', order:4, stack:'ch' },
+      { type:'bar', label:'电话接通', data:phoneD,
+        backgroundColor:'rgba(230,126,34,0.75)', yAxisID:'y', order:3, stack:'ch' },
+      { type:'bar', label:'邮件咨询', data:emailD,
+        backgroundColor:'rgba(39,174,96,0.7)', yAxisID:'y', order:2, stack:'ch' },
       { type:'line', label:'开户前咨询', data:pre,
-        borderColor:'#2e75b6', backgroundColor:'rgba(46,117,182,0.1)',
-        borderWidth:2.5, pointRadius:4, fill:false, tension:0.3, yAxisID:'y1', order:1 },
+        borderColor:'#1a202c', backgroundColor:'rgba(0,0,0,0)',
+        borderWidth:2, pointRadius:3, fill:false, tension:0.3, yAxisID:'y1', order:1,
+        borderDash:[4,2] },
       { type:'line', label:'新股申购', data:ipo,
-        borderColor:'#c0392b', backgroundColor:'rgba(192,57,43,0.1)',
+        borderColor:'#c0392b', backgroundColor:'rgba(192,57,43,0)',
         borderWidth:2.5, pointRadius:5, fill:false, tension:0.3, yAxisID:'y1', order:0,
         pointBackgroundColor: ipo.map(v => v >= 29 ? '#c0392b' : '#e8a0a0') },
     ]
