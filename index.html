@@ -88,9 +88,9 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
 <!-- KPI -->
 <div class="kpi-grid">
   <div class="kpi purple">
-    <div class="kpi-label">全渠道累计工单</div>
-    <div class="kpi-value">131,729</div>
-    <div class="kpi-sub">2024-11 至 2026-05</div>
+    <div class="kpi-label">全渠道累计接触量</div>
+    <div class="kpi-value">285,271</div>
+    <div class="kpi-sub">工单 + 在线接待 + 电话接通</div>
   </div>
   <div class="kpi red">
     <div class="kpi-label">新股申购峰值月</div>
@@ -99,7 +99,7 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
   </div>
   <div class="kpi orange">
     <div class="kpi-label">全渠道单月峰值</div>
-    <div class="kpi-value">10,219</div>
+    <div class="kpi-value">32,173</div>
     <div class="kpi-sub">2025年9月（多只新股同开）</div>
   </div>
   <div class="kpi green">
@@ -112,7 +112,7 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
 <!-- Main chart: all 4 series -->
 <div class="card">
   <div class="card-title">全渠道工单总量 与 各分类咨询量趋势对比</div>
-  <div class="card-desc">灰色柱为每月全渠道工单总量（左轴）；三条折线分别为开户前咨询、新股申购、资金相关（右轴）</div>
+  <div class="card-desc">灰色柱为全渠道合计（工单系统 + 在线接待量 + 电话接通，左轴）；折线为新股申购与开户前咨询（工单系统，右轴）。注：2024-11~2025-04 及 2026-05 仅含工单数据</div>
   <div class="legend-box">
     <div class="legend-item"><div class="legend-bar" style="background:#94a3b8"></div> 全渠道总量</div>
     <div class="legend-item"><div class="legend-color" style="background:#2e75b6;height:3px"></div> 开户前咨询</div>
@@ -142,14 +142,14 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
         <div class="dot" style="background:#7e3af2"></div>
         <div class="insight-text">
           <strong>新股事件拉动全渠道总量</strong>
-          <p>2025-09 全渠道达 10,219 单（历史峰值），新股申购 53 单仅占 0.5%，但开户前咨询同期达 973 单，显示大量潜在客户进线咨询开户。</p>
+          <p>2025-09 全渠道达 32,173 次接触（工单10,219 + 在线接待18,653 + 电话3,301），为历史峰值；开户前咨询工单 973 单，显示大量潜在客户进线咨询开户。</p>
         </div>
       </div>
       <div class="insight-item">
         <div class="dot" style="background:#c0392b"></div>
         <div class="insight-text">
           <strong>FGRD-YLDS 引发 2026-02 申购爆发</strong>
-          <p>当月新股申购 176 单，占开户前咨询 104%，全渠道总量 8,289 单亦有明显上扬，单一产品驱动显著。</p>
+          <p>当月新股申购 176 单，占开户前咨询 104%，全渠道合计 20,386 次接触，单一产品驱动显著。</p>
         </div>
       </div>
       <div class="insight-item">
@@ -249,8 +249,8 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
   <table>
     <thead>
       <tr>
-        <th>月份</th><th>全渠道总量</th><th>开户前咨询</th>
-        <th>新股申购</th><th>新股占总量%</th><th>开户前占总量%</th>
+        <th>月份</th><th>全渠道合计</th><th>其中工单</th><th>开户前咨询</th>
+        <th>新股申购</th><th>新股占工单%</th><th>开户前占工单%</th>
       </tr>
     </thead>
     <tbody id="detailTable"></tbody>
@@ -264,10 +264,12 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
 const months  = ['2024-11','2024-12','2025-01','2025-02','2025-03','2025-04',
                  '2025-05','2025-06','2025-07','2025-08','2025-09','2025-10',
                  '2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
-const total   = [3885,4198,5164,5754,7077,6905,5855,5739,7048,8066,10219,9963,7791,7783,7722,8289,7082,6556,4682];
+// 全渠道 = 工单系统 + 在线接待量(lighthouse) + 电话接通量
+// 2024-11~2025-04 及 2026-05 仅有工单数据，其余月份为三源合计
+const total   = [3885,4198,5164,5754,7077,6905,15221,14995,19574,23414,32173,27186,20046,18833,20008,20386,18735,17035,4682];
+const woOnly  = [3885,4198,5164,5754,7077,6905,5855,5739,7048,8066,10219,9963,7791,7783,7722,8289,7082,6556,4682]; // 工单系统单独
 const pre     = [194,144,171,219,311,362,243,195,206,439,973,478,204,210,228,169,156,175,140];
 const ipo     = [4,0,1,2,2,10,4,0,5,29,53,4,0,16,4,176,33,11,10];
-const funds   = [13,14,8,12,30,22,10,18,9,20,27,28,30,6,13,22,11,8,10];
 
 // IPO event markers
 const ipoEvents = {
@@ -363,28 +365,31 @@ new Chart(ctx2, {
 
 // ── Detail table ──────────────────────────────────────────────────────────────
 const tbody = document.getElementById('detailTable');
-let tTotal=0, tPre=0, tIpo=0;
+let tTotal=0, tWo=0, tPre=0, tIpo=0;
 months.forEach((m,i) => {
-  tTotal+=total[i]; tPre+=pre[i]; tIpo+=ipo[i];
+  tTotal+=total[i]; tWo+=woOnly[i]; tPre+=pre[i]; tIpo+=ipo[i];
   const isHighlight = ipo[i]>=10;
   const tr = document.createElement('tr');
   if(isHighlight) tr.className='peak';
-  const ipoPct = (ipo[i]/total[i]*100).toFixed(1)+'%';
-  const prePct = (pre[i]/total[i]*100).toFixed(1)+'%';
+  const wo = woOnly[i];
+  const ipoPct = wo>0?(ipo[i]/wo*100).toFixed(1)+'%':'—';
+  const prePct = wo>0?(pre[i]/wo*100).toFixed(1)+'%':'—';
+  const hasAllData = total[i] > woOnly[i];
   tr.innerHTML = `
     <td>${m}${ipoEvents[m]?' <span style="font-size:10px;color:#c0392b">▲'+ipoEvents[m]+'</span>':''}</td>
-    <td>${total[i].toLocaleString()}</td>
+    <td>${total[i].toLocaleString()}${!hasAllData?'<span style="font-size:10px;color:#9ca3af"> *</span>':''}</td>
+    <td>${wo.toLocaleString()}</td>
     <td>${pre[i]}</td>
     <td>${ipo[i]||'—'}</td>
-    <td style="color:${ipo[i]/total[i]>.02?'#c0392b':ipo[i]/total[i]>.005?'#e67e22':'#718096'}">${ipo[i]?ipoPct:'—'}</td>
+    <td style="color:${ipo[i]/wo>.02?'#c0392b':ipo[i]/wo>.005?'#e67e22':'#718096'}">${ipo[i]?ipoPct:'—'}</td>
     <td>${prePct}</td>`;
   tbody.appendChild(tr);
 });
 const tRow = document.createElement('tr');
 tRow.className='total-row';
-tRow.innerHTML=`<td>合计</td><td>${tTotal.toLocaleString()}</td><td>${tPre.toLocaleString()}</td>
+tRow.innerHTML=`<td>合计</td><td>${tTotal.toLocaleString()}</td><td>${tWo.toLocaleString()}</td><td>${tPre.toLocaleString()}</td>
   <td>${tIpo}</td>
-  <td>${(tIpo/tTotal*100).toFixed(1)}%</td><td>${(tPre/tTotal*100).toFixed(1)}%</td>`;
+  <td>${(tIpo/tWo*100).toFixed(1)}%</td><td>${(tPre/tWo*100).toFixed(1)}%</td>`;
 tbody.appendChild(tRow);
 </script>
 </body>
