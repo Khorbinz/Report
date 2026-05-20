@@ -79,7 +79,7 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
   <h1>新股申购咨询量分析</h1>
   <div class="header-sub">全渠道咨询趋势 · 新股申购 vs 开户前咨询 vs 资金调拨 影响对比</div>
   <div class="header-meta">
-    <span>数据周期：<strong>2024年11月 — 2026年5月</strong></span>
+    <span>数据周期：<strong>2025年5月 — 2026年5月</strong></span>
     <span>数据来源：<strong>灯塔 · 工单系统（全渠道）</strong></span>
     <span>更新日期：<strong>2026年5月21日</strong></span>
   </div>
@@ -89,8 +89,8 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
 <div class="kpi-grid">
   <div class="kpi purple">
     <div class="kpi-label">全渠道累计接触量</div>
-    <div class="kpi-value">325,336</div>
-    <div class="kpi-sub">在线 + 电话 + 邮件（含部分月工单估算，全团队）</div>
+    <div class="kpi-value">292,353</div>
+    <div class="kpi-sub">在线 + 电话 + 邮件（2026-05 数据不完整，全团队）</div>
   </div>
   <div class="kpi red">
     <div class="kpi-label">新股申购峰值月</div>
@@ -104,15 +104,15 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
   </div>
   <div class="kpi green">
     <div class="kpi-label">开户前咨询累计</div>
-    <div class="kpi-value">5,217</div>
-    <div class="kpi-sub">同期对照基准</div>
+    <div class="kpi-value">3,816</div>
+    <div class="kpi-sub">同期对照基准（2025-05 起）</div>
   </div>
 </div>
 
 <!-- Main chart: all 4 series -->
 <div class="card">
   <div class="card-title">全渠道工单总量 与 各分类咨询量趋势对比</div>
-  <div class="card-desc">堆叠柱为三渠道量（在线接待 + 电话接通 + 邮件咨询，左轴）；折线为新股申购与开户前咨询工单数（右轴）。注：2024-11~2025-04 及 2026-05 数据不完整仅供参考</div>
+  <div class="card-desc">堆叠柱为三渠道量（在线接待 + 电话接通 + 邮件咨询，左轴）；折线为新股申购与开户前咨询工单数（右轴）。注：2026-05 数据不完整仅供参考</div>
   <div class="legend-box">
     <div class="legend-item"><div class="legend-bar" style="background:rgba(46,117,182,0.7)"></div> 在线接待</div>
     <div class="legend-item"><div class="legend-bar" style="background:rgba(230,126,34,0.75)"></div> 电话接通</div>
@@ -177,12 +177,6 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>2025年3月 *</td><td>CoreWeave</td>
-        <td><span class="badge b-blue">CRWV / Nasdaq</span></td>
-        <td>2</td><td>7,077</td>
-        <td class="note-cell unverified">AI算力，3月28日上市；需确认 moomoo MY 是否上架</td>
-      </tr>
       <tr>
         <td>2025年7月 *</td><td>Figma</td>
         <td><span class="badge b-blue">FIG / NYSE</span></td>
@@ -263,18 +257,17 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
 </div>
 
 <script>
-const months  = ['2024-11','2024-12','2025-01','2025-02','2025-03','2025-04',
-                 '2025-05','2025-06','2025-07','2025-08','2025-09','2025-10',
+const months  = ['2025-05','2025-06','2025-07','2025-08','2025-09','2025-10',
                  '2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
 // 三渠道独立数据 — 全团队（0 = 当月无数据）
-const onlineD = [0,0,0,0,0,0,5749,5816,7443,10484,18653,13202,8957,7861,8196,7969,6806,6662,0];
-const phoneD  = [0,0,0,0,0,0,5263,5260,7280,6746,5462,6753,5492,5445,6258,6263,7367,6515,0];
-const emailD  = [0,0,0,0,0,0,6754,6634,8057,9361,12059,11616,8951,8879,8715,9329,7971,7443,0];
-// 全渠道合计（2025-05~2026-04 为三渠道之和；其余月份仅工单，标 *）
-const total   = [3885,4198,5164,5754,7077,6905,17766,17710,22780,26591,36174,31571,23400,22185,23169,23561,22144,20620,4682];
-const woOnly  = [3885,4198,5164,5754,7077,6905,5855,5739,7048,8066,10219,9963,7791,7783,7722,8289,7082,6556,4682];
-const pre     = [194,144,171,219,311,362,243,195,206,439,973,478,204,210,228,169,156,175,140];
-const ipo     = [4,0,1,2,2,10,4,0,5,29,53,4,0,16,4,176,33,11,10];
+const onlineD = [5749,5816,7443,10484,18653,13202,8957,7861,8196,7969,6806,6662,0];
+const phoneD  = [5263,5260,7280,6746,5462,6753,5492,5445,6258,6263,7367,6515,0];
+const emailD  = [6754,6634,8057,9361,12059,11616,8951,8879,8715,9329,7971,7443,0];
+// 全渠道合计（2025-05~2026-04 为三渠道之和；2026-05 仅工单，标 *）
+const total   = [17766,17710,22780,26591,36174,31571,23400,22185,23169,23561,22144,20620,4682];
+const woOnly  = [5855,5739,7048,8066,10219,9963,7791,7783,7722,8289,7082,6556,4682];
+const pre     = [243,195,206,439,973,478,204,210,228,169,156,175,140];
+const ipo     = [4,0,5,29,53,4,0,16,4,176,33,11,10];
 
 // IPO event markers
 const ipoEvents = {
