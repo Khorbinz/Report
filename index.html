@@ -103,9 +103,9 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
     <div class="kpi-sub">2025年9月（多只新股同开）</div>
   </div>
   <div class="kpi green">
-    <div class="kpi-label">资金相关累计</div>
-    <div class="kpi-value">301</div>
-    <div class="kpi-sub">相对稳定，受新股影响有限</div>
+    <div class="kpi-label">开户前咨询累计</div>
+    <div class="kpi-value">5,217</div>
+    <div class="kpi-sub">同期对照基准</div>
   </div>
 </div>
 
@@ -117,7 +117,6 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
     <div class="legend-item"><div class="legend-bar" style="background:#94a3b8"></div> 全渠道总量</div>
     <div class="legend-item"><div class="legend-color" style="background:#2e75b6;height:3px"></div> 开户前咨询</div>
     <div class="legend-item"><div class="legend-color" style="background:#c0392b;height:3px"></div> 新股申购</div>
-    <div class="legend-item"><div class="legend-color" style="background:#27ae60;height:3px"></div> 资金相关</div>
   </div>
   <div style="position:relative;height:340px">
     <canvas id="mainChart"></canvas>
@@ -151,13 +150,6 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
         <div class="insight-text">
           <strong>FGRD-YLDS 引发 2026-02 申购爆发</strong>
           <p>当月新股申购 176 单，占开户前咨询 104%，全渠道总量 8,289 单亦有明显上扬，单一产品驱动显著。</p>
-        </div>
-      </div>
-      <div class="insight-item">
-        <div class="dot" style="background:#27ae60"></div>
-        <div class="insight-text">
-          <strong>资金相关咨询受新股影响有限</strong>
-          <p>资金相关全程维持 6–30 单/月，IPO 高峰期无明显联动，说明客户入金行为较独立，不随新股热度波动。</p>
         </div>
       </div>
       <div class="insight-item">
@@ -258,8 +250,7 @@ tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e7
     <thead>
       <tr>
         <th>月份</th><th>全渠道总量</th><th>开户前咨询</th>
-        <th>新股申购</th><th>资金相关</th>
-        <th>新股占总量%</th><th>开户前占总量%</th>
+        <th>新股申购</th><th>新股占总量%</th><th>开户前占总量%</th>
       </tr>
     </thead>
     <tbody id="detailTable"></tbody>
@@ -320,9 +311,6 @@ new Chart(ctx1, {
         borderColor:'#c0392b', backgroundColor:'rgba(192,57,43,0.1)',
         borderWidth:2.5, pointRadius:5, fill:false, tension:0.3, yAxisID:'y1', order:0,
         pointBackgroundColor: ipo.map(v => v >= 29 ? '#c0392b' : '#e8a0a0') },
-      { type:'line', label:'资金相关', data:funds,
-        borderColor:'#27ae60', backgroundColor:'rgba(39,174,96,0.08)',
-        borderWidth:2, pointRadius:3, fill:false, tension:0.3, yAxisID:'y1', order:2 },
     ]
   },
   options: {
@@ -375,20 +363,19 @@ new Chart(ctx2, {
 
 // ── Detail table ──────────────────────────────────────────────────────────────
 const tbody = document.getElementById('detailTable');
-let tTotal=0, tPre=0, tIpo=0, tFunds=0;
+let tTotal=0, tPre=0, tIpo=0;
 months.forEach((m,i) => {
-  tTotal+=total[i]; tPre+=pre[i]; tIpo+=ipo[i]; tFunds+=funds[i];
+  tTotal+=total[i]; tPre+=pre[i]; tIpo+=ipo[i];
   const isHighlight = ipo[i]>=10;
   const tr = document.createElement('tr');
   if(isHighlight) tr.className='peak';
-  const ipoPct  = (ipo[i]/total[i]*100).toFixed(1)+'%';
-  const prePct  = (pre[i]/total[i]*100).toFixed(1)+'%';
+  const ipoPct = (ipo[i]/total[i]*100).toFixed(1)+'%';
+  const prePct = (pre[i]/total[i]*100).toFixed(1)+'%';
   tr.innerHTML = `
     <td>${m}${ipoEvents[m]?' <span style="font-size:10px;color:#c0392b">▲'+ipoEvents[m]+'</span>':''}</td>
     <td>${total[i].toLocaleString()}</td>
     <td>${pre[i]}</td>
     <td>${ipo[i]||'—'}</td>
-    <td>${funds[i]}</td>
     <td style="color:${ipo[i]/total[i]>.02?'#c0392b':ipo[i]/total[i]>.005?'#e67e22':'#718096'}">${ipo[i]?ipoPct:'—'}</td>
     <td>${prePct}</td>`;
   tbody.appendChild(tr);
@@ -396,7 +383,7 @@ months.forEach((m,i) => {
 const tRow = document.createElement('tr');
 tRow.className='total-row';
 tRow.innerHTML=`<td>合计</td><td>${tTotal.toLocaleString()}</td><td>${tPre.toLocaleString()}</td>
-  <td>${tIpo}</td><td>${tFunds}</td>
+  <td>${tIpo}</td>
   <td>${(tIpo/tTotal*100).toFixed(1)}%</td><td>${(tPre/tTotal*100).toFixed(1)}%</td>`;
 tbody.appendChild(tRow);
 </script>
