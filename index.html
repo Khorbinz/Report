@@ -5,433 +5,400 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>新股申购咨询分析报告</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background: #f0f4f8; color: #1a202c; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','Microsoft YaHei',sans-serif; background:#f0f4f8; color:#1a202c; }
+.page { max-width:1120px; margin:0 auto; padding:32px 24px 60px; }
 
-  .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+.header { background:linear-gradient(135deg,#0f2d52 0%,#1a5276 100%);
+  border-radius:16px; padding:36px 40px; margin-bottom:28px; color:#fff; }
+.header-tag { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#7fb3d3; margin-bottom:10px; }
+.header h1 { font-size:26px; font-weight:700; margin-bottom:8px; }
+.header-sub { font-size:14px; color:#acd0e8; }
+.header-meta { margin-top:18px; display:flex; gap:28px; flex-wrap:wrap; }
+.header-meta span { font-size:12px; color:#7fb3d3; }
+.header-meta strong { color:#fff; }
 
-  /* Header */
-  .header { background: linear-gradient(135deg, #0f2d52 0%, #1a5276 100%);
-    border-radius: 16px; padding: 36px 40px; margin-bottom: 28px; color: #fff; }
-  .header-tag { font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-    color: #7fb3d3; margin-bottom: 10px; }
-  .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
-  .header-sub { font-size: 14px; color: #acd0e8; }
-  .header-meta { margin-top: 18px; display: flex; gap: 24px; }
-  .header-meta span { font-size: 12px; color: #7fb3d3; }
-  .header-meta strong { color: #fff; }
+.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+.kpi { background:#fff; border-radius:12px; padding:22px 20px;
+  box-shadow:0 1px 4px rgba(0,0,0,.08); border-top:4px solid #2e75b6; }
+.kpi.red    { border-top-color:#c0392b; }
+.kpi.green  { border-top-color:#27ae60; }
+.kpi.orange { border-top-color:#e67e22; }
+.kpi.purple { border-top-color:#7e3af2; }
+.kpi-label { font-size:11px; color:#718096; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+.kpi-value { font-size:30px; font-weight:700; color:#1a202c; line-height:1; }
+.kpi-sub   { font-size:12px; color:#a0aec0; margin-top:6px; }
 
-  /* KPI cards */
-  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-  .kpi { background: #fff; border-radius: 12px; padding: 22px 20px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.08); border-top: 4px solid #2e75b6; }
-  .kpi.red   { border-top-color: #c0392b; }
-  .kpi.green { border-top-color: #27ae60; }
-  .kpi.orange{ border-top-color: #e67e22; }
-  .kpi-label { font-size: 11px; color: #718096; text-transform: uppercase;
-    letter-spacing: 1px; margin-bottom: 8px; }
-  .kpi-value { font-size: 32px; font-weight: 700; color: #1a202c; line-height: 1; }
-  .kpi-sub   { font-size: 12px; color: #a0aec0; margin-top: 6px; }
+.card { background:#fff; border-radius:14px; padding:28px 28px 24px;
+  box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:24px; }
+.card-title { font-size:15px; font-weight:700; color:#0f2d52; margin-bottom:4px; }
+.card-desc  { font-size:12px; color:#718096; margin-bottom:20px; }
 
-  /* Cards */
-  .card { background: #fff; border-radius: 14px; padding: 28px 28px 24px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 24px; }
-  .card-title { font-size: 15px; font-weight: 700; color: #0f2d52; margin-bottom: 6px; }
-  .card-desc  { font-size: 12px; color: #718096; margin-bottom: 20px; }
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; }
 
-  /* Chart container */
-  .chart-wrap { position: relative; }
+.insights { display:flex; flex-direction:column; gap:14px; }
+.insight-item { display:flex; gap:12px; align-items:flex-start; }
+.dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.insight-text strong { font-size:13px; color:#1a202c; display:block; margin-bottom:2px; }
+.insight-text p { font-size:12px; color:#718096; line-height:1.6; }
 
-  /* Two-col layout */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:#0f2d52; color:#fff; padding:10px 14px; text-align:center;
+  font-weight:600; font-size:12px; }
+td { padding:9px 14px; text-align:center; border-bottom:1px solid #edf2f7; }
+tr:nth-child(even) td { background:#f7fafc; }
+tr.peak td { background:#fff8e1; font-weight:600; }
+tr.total-row td { background:#ebf5fb; font-weight:700; border-top:2px solid #2e75b6; }
 
-  /* Insights */
-  .insights { display: flex; flex-direction: column; gap: 14px; }
-  .insight-item { display: flex; gap: 14px; align-items: flex-start; }
-  .insight-dot  { width: 10px; height: 10px; border-radius: 50%;
-    flex-shrink: 0; margin-top: 4px; }
-  .dot-blue   { background: #2e75b6; }
-  .dot-red    { background: #c0392b; }
-  .dot-green  { background: #27ae60; }
-  .dot-orange { background: #e67e22; }
-  .insight-text strong { font-size: 13px; color: #1a202c; display: block; margin-bottom: 2px; }
-  .insight-text p { font-size: 12px; color: #718096; line-height: 1.6; }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+.b-blue   { background:#dbeafe; color:#1e40af; }
+.b-red    { background:#fee2e2; color:#991b1b; }
+.b-green  { background:#d1fae5; color:#065f46; }
+.b-purple { background:#ede9fe; color:#5b21b6; }
+.b-orange { background:#ffedd5; color:#9a3412; }
+.b-gray   { background:#f3f4f6; color:#374151; }
+.unverified { font-size:11px; color:#9ca3af; font-style:italic; }
+.note-cell { text-align:left; font-size:12px; color:#4a5568; }
 
-  /* Table */
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: #0f2d52; color: #fff; padding: 10px 14px; text-align: center;
-    font-weight: 600; font-size: 12px; }
-  td { padding: 9px 14px; text-align: center; border-bottom: 1px solid #edf2f7; }
-  tr:nth-child(even) td { background: #f7fafc; }
-  tr.highlight td { background: #fff8e1; font-weight: 600; }
-  tr.total td { background: #ebf5fb; font-weight: 700; border-top: 2px solid #2e75b6; }
-  .pct-high { color: #c0392b; font-weight: 700; }
-  .pct-mid  { color: #e67e22; font-weight: 600; }
+.legend-box { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:16px; }
+.legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:#4a5568; }
+.legend-color { width:16px; height:4px; border-radius:2px; }
+.legend-bar   { width:16px; height:12px; border-radius:2px; opacity:.7; }
 
-  /* IPO Events table */
-  .ipo-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .ipo-table th { background: #0f2d52; color: #fff; padding: 10px 14px;
-    text-align: left; font-weight: 600; font-size: 12px; }
-  .ipo-table td { padding: 9px 14px; border-bottom: 1px solid #edf2f7; vertical-align: top; }
-  .ipo-table tr:nth-child(even) td { background: #f7fafc; }
-  .ipo-table tr.peak td { background: #fff3cd; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
-    font-size: 11px; font-weight: 600; }
-  .badge-blue   { background: #dbeafe; color: #1e40af; }
-  .badge-red    { background: #fee2e2; color: #991b1b; }
-  .badge-green  { background: #d1fae5; color: #065f46; }
-  .badge-purple { background: #ede9fe; color: #5b21b6; }
-  .badge-orange { background: #ffedd5; color: #9a3412; }
-  .badge-gray   { background: #f3f4f6; color: #374151; }
-  .unverified { font-size: 11px; color: #9ca3af; font-style: italic; }
-
-  /* Footer */
-  .footer { text-align: center; font-size: 11px; color: #a0aec0; margin-top: 40px; }
+.footer { text-align:center; font-size:11px; color:#a0aec0; margin-top:40px; }
 </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- Header -->
-  <div class="header">
-    <div class="header-tag">客服数据分析报告</div>
-    <h1>新股申购咨询量分析</h1>
-    <div class="header-sub">渠道来源趋势 · 对开户前咨询量的影响研究</div>
-    <div class="header-meta">
-      <span>数据周期：<strong>2024年11月 — 2026年5月</strong></span>
-      <span>数据来源：<strong>灯塔 · 工单系统</strong></span>
-      <span>更新日期：<strong>2026年5月20日</strong></span>
-    </div>
+<!-- Header -->
+<div class="header">
+  <div class="header-tag">客服数据分析报告</div>
+  <h1>新股申购咨询量分析</h1>
+  <div class="header-sub">全渠道咨询趋势 · 新股申购 vs 开户前咨询 vs 资金调拨 影响对比</div>
+  <div class="header-meta">
+    <span>数据周期：<strong>2024年11月 — 2026年5月</strong></span>
+    <span>数据来源：<strong>灯塔 · 工单系统（全渠道）</strong></span>
+    <span>更新日期：<strong>2026年5月21日</strong></span>
   </div>
+</div>
 
-  <!-- KPI -->
-  <div class="kpi-grid">
-    <div class="kpi">
-      <div class="kpi-label">新股申购累计工单</div>
-      <div class="kpi-value">364</div>
-      <div class="kpi-sub">2024-11 至 2026-05</div>
-    </div>
-    <div class="kpi red">
-      <div class="kpi-label">单月峰值</div>
-      <div class="kpi-value">176</div>
-      <div class="kpi-sub">2026年2月（同比激增）</div>
-    </div>
-    <div class="kpi orange">
-      <div class="kpi-label">峰值月占比</div>
-      <div class="kpi-value">104%</div>
-      <div class="kpi-sub">超过当月开户前咨询总量</div>
-    </div>
-    <div class="kpi green">
-      <div class="kpi-label">开户前咨询累计</div>
-      <div class="kpi-value">5,217</div>
-      <div class="kpi-sub">同期对照基准</div>
-    </div>
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kpi purple">
+    <div class="kpi-label">全渠道累计工单</div>
+    <div class="kpi-value">131,729</div>
+    <div class="kpi-sub">2024-11 至 2026-05</div>
   </div>
+  <div class="kpi red">
+    <div class="kpi-label">新股申购峰值月</div>
+    <div class="kpi-value">176</div>
+    <div class="kpi-sub">2026年2月（FGRD-YLDS）</div>
+  </div>
+  <div class="kpi orange">
+    <div class="kpi-label">全渠道单月峰值</div>
+    <div class="kpi-value">10,219</div>
+    <div class="kpi-sub">2025年9月（多只新股同开）</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">资金相关累计</div>
+    <div class="kpi-value">301</div>
+    <div class="kpi-sub">相对稳定，受新股影响有限</div>
+  </div>
+</div>
 
-  <!-- Main combo chart -->
+<!-- Main chart: all 4 series -->
+<div class="card">
+  <div class="card-title">全渠道工单总量 与 各分类咨询量趋势对比</div>
+  <div class="card-desc">灰色柱为每月全渠道工单总量（左轴）；三条折线分别为开户前咨询、新股申购、资金相关（右轴）</div>
+  <div class="legend-box">
+    <div class="legend-item"><div class="legend-bar" style="background:#94a3b8"></div> 全渠道总量</div>
+    <div class="legend-item"><div class="legend-color" style="background:#2e75b6;height:3px"></div> 开户前咨询</div>
+    <div class="legend-item"><div class="legend-color" style="background:#c0392b;height:3px"></div> 新股申购</div>
+    <div class="legend-item"><div class="legend-color" style="background:#27ae60;height:3px"></div> 资金相关</div>
+  </div>
+  <div style="position:relative;height:340px">
+    <canvas id="mainChart"></canvas>
+  </div>
+</div>
+
+<!-- Two col -->
+<div class="two-col">
+  <!-- IPO impact ratio -->
   <div class="card">
-    <div class="card-title">月度趋势：新股申购 vs 开户前咨询</div>
-    <div class="card-desc">柱状图为开户前咨询量（左轴），折线为新股申购量（右轴）</div>
-    <div class="chart-wrap" style="height:320px">
-      <canvas id="comboChart"></canvas>
+    <div class="card-title">新股申购占全渠道总量比例</div>
+    <div class="card-desc">IPO 公布后的全渠道咨询冲击程度</div>
+    <div style="position:relative;height:240px">
+      <canvas id="impactChart"></canvas>
     </div>
   </div>
-
-  <!-- Two column: ratio chart + insights -->
-  <div class="two-col">
-    <div class="card">
-      <div class="card-title">新股申购占开户前咨询比例</div>
-      <div class="card-desc">每月新股申购量 ÷ 开户前咨询量</div>
-      <div class="chart-wrap" style="height:240px">
-        <canvas id="ratioChart"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">关键洞察</div>
-      <div class="card-desc">数据驱动的业务发现</div>
-      <div class="insights">
-        <div class="insight-item">
-          <div class="insight-dot dot-blue"></div>
-          <div class="insight-text">
-            <strong>新产品驱动咨询激增</strong>
-            <p>2025-09 新股申购达 53 单，同月开户前咨询也攀升至峰值 973 单，两者高度联动，推测与特定新股上市活动相关。</p>
-          </div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-dot dot-red"></div>
-          <div class="insight-text">
-            <strong>2026年2月异常峰值</strong>
-            <p>新股申购单月达 176 单，占开户前咨询 104%，超过开户前咨询总量，显示有大批客户专门因新股咨询进线。</p>
-          </div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-dot dot-orange"></div>
-          <div class="insight-text">
-            <strong>咨询量与新股事件强相关</strong>
-            <p>无新股活动月份（2024-12、2025-06、2025-11）新股申购工单为 0，印证咨询量完全受新股事件驱动。</p>
-          </div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-dot dot-green"></div>
-          <div class="insight-text">
-            <strong>建议提前备战</strong>
-            <p>新股活动前可提前准备 FAQ、增援客服资源，重点在马来西亚在线组与邮件组，占 90% 以上工单。</p>
-          </div>
+  <!-- Insights -->
+  <div class="card">
+    <div class="card-title">关键洞察</div>
+    <div class="card-desc">数据驱动的业务发现</div>
+    <div class="insights">
+      <div class="insight-item">
+        <div class="dot" style="background:#7e3af2"></div>
+        <div class="insight-text">
+          <strong>新股事件拉动全渠道总量</strong>
+          <p>2025-09 全渠道达 10,219 单（历史峰值），新股申购 53 单仅占 0.5%，但开户前咨询同期达 973 单，显示大量潜在客户进线咨询开户。</p>
         </div>
       </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#c0392b"></div>
+        <div class="insight-text">
+          <strong>FGRD-YLDS 引发 2026-02 申购爆发</strong>
+          <p>当月新股申购 176 单，占开户前咨询 104%，全渠道总量 8,289 单亦有明显上扬，单一产品驱动显著。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#27ae60"></div>
+        <div class="insight-text">
+          <strong>资金相关咨询受新股影响有限</strong>
+          <p>资金相关全程维持 6–30 单/月，IPO 高峰期无明显联动，说明客户入金行为较独立，不随新股热度波动。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#e67e22"></div>
+        <div class="insight-text">
+          <strong>建议提前预备资源</strong>
+          <p>IPO 公布后 1–2 周内为咨询高峰期，建议重点增援在线组与邮件组，并提前上线 FAQ 以减少重复咨询。</p>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- IPO Events -->
-  <div class="card">
-    <div class="card-title">新股事件对照表</div>
-    <div class="card-desc">⚠️ 带 * 标注为推测关联，需结合 moomoo MY 实际上架记录确认</div>
-    <table class="ipo-table">
-      <thead>
-        <tr>
-          <th>时间</th>
-          <th>股票</th>
-          <th>代码 / 交易所</th>
-          <th>当月工单</th>
-          <th>备注</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>2025年3月 *</td>
-          <td>CoreWeave</td>
-          <td><span class="badge badge-blue">CRWV / Nasdaq</span></td>
-          <td>2</td>
-          <td class="unverified">AI算力公司，3月28日上市，Nvidia背书；需确认是否在 moomoo MY 上架</td>
-        </tr>
-        <tr>
-          <td>2025年8月</td>
-          <td>Bullish</td>
-          <td><span class="badge badge-purple">— / —</span></td>
-          <td>29</td>
-          <td>加密交易所，moomoo 认购 $2.25 亿</td>
-        </tr>
-        <tr>
-          <td>2025年9月</td>
-          <td>多只新股</td>
-          <td><span class="badge badge-gray">—</span></td>
-          <td>53</td>
-          <td>Instagram 帖子显示"多只IPO同时开放"，峰值月（开户前咨询同达 973 单）</td>
-        </tr>
-        <tr>
-          <td>2025年7月 *</td>
-          <td>Figma</td>
-          <td><span class="badge badge-blue">FIG / NYSE</span></td>
-          <td>5</td>
-          <td class="unverified">设计工具独角兽，7月31日上市，$33/股；需确认是否在 moomoo MY 上架</td>
-        </tr>
-        <tr>
-          <td>2025年12月17日</td>
-          <td>Medline</td>
-          <td><span class="badge badge-blue">MDLN / Nasdaq</span></td>
-          <td>16</td>
-          <td>美国最大医疗用品商之一</td>
-        </tr>
-        <tr>
-          <td>2026年1月23日</td>
-          <td>BitGo</td>
-          <td><span class="badge badge-blue">BTGO / NYSE</span></td>
-          <td>4</td>
-          <td>首只加密 IPO，moomoo 占 10% 配额，100% 中签</td>
-        </tr>
-        <tr class="peak">
-          <td>2026年2月</td>
-          <td>FGRD-YLDS</td>
-          <td><span class="badge badge-red">FGRD-YLDS</span></td>
-          <td><strong>176（峰值）</strong></td>
-          <td>当月咨询量激增主因，占开户前咨询 104%</td>
-        </tr>
-        <tr>
-          <td>2026年3月 *</td>
-          <td>MiniMed Group</td>
-          <td><span class="badge badge-blue">MMED / Nasdaq</span></td>
-          <td>33</td>
-          <td class="unverified">3/6 上市，医疗健康，跌 25%；需确认是否在 moomoo MY 上架</td>
-        </tr>
-        <tr>
-          <td>2026年4月17日</td>
-          <td>AEVEX Corp</td>
-          <td><span class="badge badge-blue">AVEX / NYSE</span></td>
-          <td>11</td>
-          <td>国防承包商，上市涨 <strong>+34%</strong>（数据来源显示实涨幅高于最初报告的 15%）</td>
-        </tr>
-        <tr>
-          <td>2026年5月19日</td>
-          <td>Cerebras Systems</td>
-          <td><span class="badge badge-orange">CBRS / —</span></td>
-          <td>10</td>
-          <td>AI 芯片，IPO 价 $185，声称比 NVDA 快 20 倍</td>
-        </tr>
-      </tbody>
-    </table>
-    <p style="font-size:11px;color:#9ca3af;margin-top:12px">
-      * 推测关联基于上市时间与工单峰值吻合，实际需对照 moomoo MY 后台上架记录核实。
-      数据来源：<a href="https://www.iposcoop.com/current-year-pricings/" target="_blank" style="color:#2e75b6">IPOScoop</a>、
-      <a href="https://dealroom.net/blog/upcoming-recent-ipos" target="_blank" style="color:#2e75b6">Dealroom</a>
-    </p>
-  </div>
+<!-- IPO Events Table -->
+<div class="card">
+  <div class="card-title">新股事件对照表</div>
+  <div class="card-desc">⚠️ 标 * 为根据时间推测，需对照 moomoo MY 实际上架记录核实</div>
+  <table>
+    <thead>
+      <tr>
+        <th>时间</th><th>股票</th><th>代码 / 交易所</th>
+        <th>当月新股申购</th><th>当月全渠道</th><th>备注</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2025年3月 *</td><td>CoreWeave</td>
+        <td><span class="badge b-blue">CRWV / Nasdaq</span></td>
+        <td>2</td><td>7,077</td>
+        <td class="note-cell unverified">AI算力，3月28日上市；需确认 moomoo MY 是否上架</td>
+      </tr>
+      <tr>
+        <td>2025年7月 *</td><td>Figma</td>
+        <td><span class="badge b-blue">FIG / NYSE</span></td>
+        <td>5</td><td>7,048</td>
+        <td class="note-cell unverified">设计工具，7月31日上市；需确认 moomoo MY 是否上架</td>
+      </tr>
+      <tr class="peak">
+        <td>2025年8月</td><td>Bullish</td>
+        <td><span class="badge b-purple">— / —</span></td>
+        <td>29</td><td>8,066</td>
+        <td class="note-cell">加密交易所，moomoo 认购 $2.25 亿，全渠道同步上升</td>
+      </tr>
+      <tr class="peak">
+        <td>2025年9月</td><td>多只新股</td>
+        <td><span class="badge b-gray">—</span></td>
+        <td>53</td><td><strong>10,219（峰值）</strong></td>
+        <td class="note-cell">多只IPO同时开放，全渠道及开户前咨询双双创历史高位</td>
+      </tr>
+      <tr>
+        <td>2025年12月17日</td><td>Medline</td>
+        <td><span class="badge b-blue">MDLN / Nasdaq</span></td>
+        <td>16</td><td>7,783</td>
+        <td class="note-cell">美国最大医疗用品商之一</td>
+      </tr>
+      <tr>
+        <td>2026年1月23日</td><td>BitGo</td>
+        <td><span class="badge b-blue">BTGO / NYSE</span></td>
+        <td>4</td><td>7,722</td>
+        <td class="note-cell">首只加密IPO，moomoo 占10%配额，100%中签</td>
+      </tr>
+      <tr class="peak">
+        <td>2026年2月</td><td><strong>FGRD-YLDS</strong></td>
+        <td><span class="badge b-red">FGRD-YLDS</span></td>
+        <td><strong>176（历史峰值）</strong></td><td>8,289</td>
+        <td class="note-cell">当月申购量超过开户前咨询总量（104%），单产品驱动显著</td>
+      </tr>
+      <tr>
+        <td>2026年3月 *</td><td>MiniMed Group</td>
+        <td><span class="badge b-blue">MMED / Nasdaq</span></td>
+        <td>33</td><td>7,082</td>
+        <td class="note-cell unverified">3/6上市，医疗健康；需确认 moomoo MY 是否上架</td>
+      </tr>
+      <tr>
+        <td>2026年4月17日</td><td>AEVEX Corp</td>
+        <td><span class="badge b-blue">AVEX / NYSE</span></td>
+        <td>11</td><td>6,556</td>
+        <td class="note-cell">国防承包商，上市涨 +34%</td>
+      </tr>
+      <tr>
+        <td>2026年5月19日</td><td>Cerebras Systems</td>
+        <td><span class="badge b-orange">CBRS / —</span></td>
+        <td>10</td><td>4,682</td>
+        <td class="note-cell">AI芯片，IPO价 $185，声称比NVDA快20倍</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px;color:#9ca3af;margin-top:12px">
+    * 推测关联基于上市时间与工单峰值吻合，实际需对照 moomoo MY 后台上架记录核实。
+  </p>
+</div>
 
-  <!-- Data table -->
-  <div class="card">
-    <div class="card-title">月度明细数据</div>
-    <div class="card-desc">完整月度数据，蓝底为高占比月份</div>
-    <table>
-      <thead>
-        <tr>
-          <th>月份</th>
-          <th>开户前咨询量</th>
-          <th>新股申购量</th>
-          <th>新股申购占比</th>
-          <th>备注</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+<!-- Monthly detail table -->
+<div class="card">
+  <div class="card-title">月度全渠道明细数据</div>
+  <div class="card-desc">高亮行为新股咨询 ≥ 10 单的月份</div>
+  <table>
+    <thead>
+      <tr>
+        <th>月份</th><th>全渠道总量</th><th>开户前咨询</th>
+        <th>新股申购</th><th>资金相关</th>
+        <th>新股占总量%</th><th>开户前占总量%</th>
+      </tr>
+    </thead>
+    <tbody id="detailTable"></tbody>
+  </table>
+</div>
 
-  <div class="footer">本报告由灯塔数据自动生成 · 仅供内部参考</div>
+<div class="footer">本报告由灯塔数据自动生成 · 仅供内部参考</div>
 </div>
 
 <script>
-const months = ['2024-11','2024-12','2025-01','2025-02','2025-03','2025-04',
+const months  = ['2024-11','2024-12','2025-01','2025-02','2025-03','2025-04',
                  '2025-05','2025-06','2025-07','2025-08','2025-09','2025-10',
                  '2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
-const pre  = [194,144,171,219,311,362,243,195,206,439,973,478,204,210,228,169,156,175,140];
-const ipo  = [4,0,1,2,2,10,4,0,5,29,53,4,0,16,4,176,33,11,10];
-const ratio = months.map((_, i) => pre[i] > 0 ? +(ipo[i]/pre[i]*100).toFixed(1) : 0);
+const total   = [3885,4198,5164,5754,7077,6905,5855,5739,7048,8066,10219,9963,7791,7783,7722,8289,7082,6556,4682];
+const pre     = [194,144,171,219,311,362,243,195,206,439,973,478,204,210,228,169,156,175,140];
+const ipo     = [4,0,1,2,2,10,4,0,5,29,53,4,0,16,4,176,33,11,10];
+const funds   = [13,14,8,12,30,22,10,18,9,20,27,28,30,6,13,22,11,8,10];
 
-const notes = {
-  '2025-09': '开户前咨询峰值月',
-  '2026-02': '新股申购峰值月 ⚠️',
-  '2025-08': '申购量明显上升',
-  '2025-04': '马来西亚邮件组集中进线',
+// IPO event markers
+const ipoEvents = {
+  '2025-08': 'Bullish',
+  '2025-09': '多只新股',
+  '2025-12': 'Medline',
+  '2026-01': 'BitGo',
+  '2026-02': 'FGRD-YLDS ⚠️',
+  '2026-04': 'AEVEX',
+  '2026-05': 'Cerebras',
 };
 
-// Table
-const tbody = document.getElementById('tableBody');
-let tPre = 0, tIpo = 0;
-months.forEach((m, i) => {
-  tPre += pre[i]; tIpo += ipo[i];
-  const r = ratio[i];
-  const isHighlight = ipo[i] >= 29;
-  const tr = document.createElement('tr');
-  if (isHighlight) tr.className = 'highlight';
-  const pctClass = r >= 50 ? 'pct-high' : r >= 10 ? 'pct-mid' : '';
-  tr.innerHTML = `
-    <td>${m}</td>
-    <td>${pre[i].toLocaleString()}</td>
-    <td>${ipo[i] > 0 ? ipo[i] : '—'}</td>
-    <td class="${pctClass}">${ipo[i] > 0 ? r + '%' : '—'}</td>
-    <td style="text-align:left;color:#718096;font-size:11px">${notes[m] || ''}</td>`;
-  tbody.appendChild(tr);
-});
-const totRow = document.createElement('tr');
-totRow.className = 'total';
-const totPct = (tIpo/tPre*100).toFixed(1);
-totRow.innerHTML = `<td>合计</td><td>${tPre.toLocaleString()}</td><td>${tIpo}</td><td>${totPct}%</td><td></td>`;
-tbody.appendChild(totRow);
+// ── Main combo chart ──────────────────────────────────────────────────────────
+const ctx1 = document.getElementById('mainChart').getContext('2d');
 
-// Combo chart
-const ctx1 = document.getElementById('comboChart').getContext('2d');
+// Build annotation lines for IPO events
+const annotations = {};
+Object.entries(ipoEvents).forEach(([m, label]) => {
+  const idx = months.indexOf(m);
+  if (idx === -1) return;
+  annotations[`ipo_${m}`] = {
+    type: 'line', xMin: idx, xMax: idx,
+    borderColor: 'rgba(192,57,43,0.35)', borderWidth: 1.5, borderDash: [4,3],
+    label: { content: label, display: true, position: 'start',
+             backgroundColor: 'rgba(192,57,43,0.75)', color: '#fff',
+             font: { size: 10 }, padding: { x: 4, y: 2 } }
+  };
+});
+
 new Chart(ctx1, {
   data: {
     labels: months,
     datasets: [
-      {
-        type: 'bar',
-        label: '开户前咨询',
-        data: pre,
-        backgroundColor: 'rgba(46,117,182,0.75)',
-        borderColor: '#2e75b6',
-        borderWidth: 1,
-        yAxisID: 'y',
-        order: 2,
-      },
-      {
-        type: 'line',
-        label: '新股申购',
-        data: ipo,
-        borderColor: '#c0392b',
-        backgroundColor: 'rgba(192,57,43,0.15)',
-        borderWidth: 2.5,
-        pointRadius: 5,
-        pointBackgroundColor: '#c0392b',
-        fill: true,
-        tension: 0.3,
-        yAxisID: 'y1',
-        order: 1,
-      }
+      { type:'bar', label:'全渠道总量', data:total,
+        backgroundColor:'rgba(148,163,184,0.55)', borderColor:'#94a3b8',
+        borderWidth:1, yAxisID:'y', order:3 },
+      { type:'line', label:'开户前咨询', data:pre,
+        borderColor:'#2e75b6', backgroundColor:'rgba(46,117,182,0.1)',
+        borderWidth:2.5, pointRadius:4, fill:false, tension:0.3, yAxisID:'y1', order:1 },
+      { type:'line', label:'新股申购', data:ipo,
+        borderColor:'#c0392b', backgroundColor:'rgba(192,57,43,0.1)',
+        borderWidth:2.5, pointRadius:5, fill:false, tension:0.3, yAxisID:'y1', order:0,
+        pointBackgroundColor: ipo.map(v => v >= 29 ? '#c0392b' : '#e8a0a0') },
+      { type:'line', label:'资金相关', data:funds,
+        borderColor:'#27ae60', backgroundColor:'rgba(39,174,96,0.08)',
+        borderWidth:2, pointRadius:3, fill:false, tension:0.3, yAxisID:'y1', order:2 },
     ]
   },
   options: {
-    responsive: true, maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
     plugins: {
-      legend: { position: 'top', labels: { font: { size: 12 }, padding: 16 } },
-      tooltip: {
-        callbacks: {
-          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} 单`
-        }
-      }
+      legend:{ display:false },
+      tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${c.parsed.y.toLocaleString()} 单` } },
+      annotation:{ annotations }
     },
     scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-      y: {
-        type: 'linear', position: 'left',
-        title: { display: true, text: '开户前咨询（单）', font: { size: 11 } },
-        grid: { color: '#edf2f7' },
-        ticks: { font: { size: 11 } }
-      },
-      y1: {
-        type: 'linear', position: 'right',
-        title: { display: true, text: '新股申购（单）', font: { size: 11 } },
-        grid: { drawOnChartArea: false },
-        ticks: { font: { size: 11 } }
-      }
+      x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } },
+      y:{ type:'linear', position:'left',
+          title:{ display:true, text:'全渠道总量（单）', font:{ size:11 } },
+          grid:{ color:'#edf2f7' }, ticks:{ font:{ size:10 } } },
+      y1:{ type:'linear', position:'right',
+           title:{ display:true, text:'各分类咨询量（单）', font:{ size:11 } },
+           grid:{ drawOnChartArea:false }, ticks:{ font:{ size:10 } } }
     }
   }
 });
 
-// Ratio chart
-const ctx2 = document.getElementById('ratioChart').getContext('2d');
+// ── Impact ratio chart ────────────────────────────────────────────────────────
+const ctx2 = document.getElementById('impactChart').getContext('2d');
+const ipoRatio = months.map((_,i) => total[i]>0 ? +(ipo[i]/total[i]*100).toFixed(2) : 0);
 new Chart(ctx2, {
-  type: 'line',
-  data: {
-    labels: months,
-    datasets: [{
-      label: '占比 (%)',
-      data: ratio,
-      borderColor: '#e67e22',
-      backgroundColor: 'rgba(230,126,34,0.12)',
-      borderWidth: 2.5,
-      pointRadius: 4,
-      pointBackgroundColor: ratio.map(r => r >= 50 ? '#c0392b' : r >= 10 ? '#e67e22' : '#e67e22'),
-      fill: true,
-      tension: 0.3,
+  type:'bar',
+  data:{
+    labels:months,
+    datasets:[{
+      label:'新股申购占全渠道%',
+      data:ipoRatio,
+      backgroundColor: ipoRatio.map(v => v>=2?'rgba(192,57,43,0.75)':v>=0.5?'rgba(230,126,34,0.7)':'rgba(46,117,182,0.5)'),
+      borderRadius:4,
     }]
   },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: ctx => `占比: ${ctx.parsed.y}%` } }
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ display:false },
+      tooltip:{ callbacks:{ label: c=>`${c.parsed.y}%（${ipo[c.dataIndex]}/${total[c.dataIndex]} 单）` } }
     },
-    scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-      y: {
-        grid: { color: '#edf2f7' },
-        ticks: { font: { size: 10 }, callback: v => v + '%' },
-        title: { display: true, text: '新股申购 / 开户前咨询', font: { size: 10 } }
-      }
+    scales:{
+      x:{ grid:{display:false}, ticks:{ font:{size:10} } },
+      y:{ grid:{color:'#edf2f7'}, ticks:{ font:{size:10}, callback:v=>v+'%' },
+          title:{ display:true, text:'占总量比例', font:{size:10} } }
     }
   }
 });
+
+// ── Detail table ──────────────────────────────────────────────────────────────
+const tbody = document.getElementById('detailTable');
+let tTotal=0, tPre=0, tIpo=0, tFunds=0;
+months.forEach((m,i) => {
+  tTotal+=total[i]; tPre+=pre[i]; tIpo+=ipo[i]; tFunds+=funds[i];
+  const isHighlight = ipo[i]>=10;
+  const tr = document.createElement('tr');
+  if(isHighlight) tr.className='peak';
+  const ipoPct  = (ipo[i]/total[i]*100).toFixed(1)+'%';
+  const prePct  = (pre[i]/total[i]*100).toFixed(1)+'%';
+  tr.innerHTML = `
+    <td>${m}${ipoEvents[m]?' <span style="font-size:10px;color:#c0392b">▲'+ipoEvents[m]+'</span>':''}</td>
+    <td>${total[i].toLocaleString()}</td>
+    <td>${pre[i]}</td>
+    <td>${ipo[i]||'—'}</td>
+    <td>${funds[i]}</td>
+    <td style="color:${ipo[i]/total[i]>.02?'#c0392b':ipo[i]/total[i]>.005?'#e67e22':'#718096'}">${ipo[i]?ipoPct:'—'}</td>
+    <td>${prePct}</td>`;
+  tbody.appendChild(tr);
+});
+const tRow = document.createElement('tr');
+tRow.className='total-row';
+tRow.innerHTML=`<td>合计</td><td>${tTotal.toLocaleString()}</td><td>${tPre.toLocaleString()}</td>
+  <td>${tIpo}</td><td>${tFunds}</td>
+  <td>${(tIpo/tTotal*100).toFixed(1)}%</td><td>${(tPre/tTotal*100).toFixed(1)}%</td>`;
+tbody.appendChild(tRow);
 </script>
 </body>
 </html>
