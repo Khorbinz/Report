@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>媒体事件影响分析报告 · 2026年5月</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Microsoft YaHei',sans-serif;background:#f0f4f8;color:#1a202c}
+.page{max-width:1140px;margin:0 auto;padding:32px 24px 60px}
+
+.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);
+  border-radius:16px;padding:36px 40px;margin-bottom:28px;color:#fff}
+.header-tag{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#e94560;margin-bottom:10px}
+.header h1{font-size:26px;font-weight:700;margin-bottom:8px}
+.header-sub{font-size:14px;color:#a8b2d8;line-height:1.6}
+.header-meta{margin-top:18px;display:flex;gap:28px;flex-wrap:wrap}
+.header-meta span{font-size:12px;color:#8892b0}
+.header-meta strong{color:#ccd6f6}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:28px}
+.kpi{background:#fff;border-radius:12px;padding:22px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:4px solid #2e75b6}
+.kpi.red{border-top-color:#e94560}
+.kpi.orange{border-top-color:#e67e22}
+.kpi.green{border-top-color:#27ae60}
+.kpi.purple{border-top-color:#7e3af2}
+.kpi-label{font-size:11px;color:#718096;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.kpi-value{font-size:28px;font-weight:700;color:#1a202c;line-height:1}
+.kpi-sub{font-size:12px;color:#a0aec0;margin-top:6px}
+
+.card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:24px}
+.card-title{font-size:15px;font-weight:700;color:#0f2d52;margin-bottom:4px}
+.card-desc{font-size:12px;color:#718096;margin-bottom:20px}
+
+.two-col{display:grid;grid-template-columns:3fr 2fr;gap:24px;margin-bottom:24px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:24px}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#1a1a2e;color:#fff;padding:10px 14px;text-align:center;font-weight:600;font-size:12px}
+td{padding:9px 14px;text-align:center;border-bottom:1px solid #edf2f7}
+tr:nth-child(even) td{background:#f7fafc}
+tr.event-row td{background:#fff0f0;font-weight:600}
+tr.anomaly-row td{background:#fffbe6;font-weight:600}
+tr.total-row td{background:#ebf5fb;font-weight:700;border-top:2px solid #2e75b6}
+
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.b-red{background:#fee2e2;color:#991b1b}
+.b-orange{background:#ffedd5;color:#9a3412}
+.b-green{background:#d1fae5;color:#065f46}
+.b-blue{background:#dbeafe;color:#1e40af}
+.b-gray{background:#f3f4f6;color:#374151}
+
+.insight-list{display:flex;flex-direction:column;gap:16px}
+.insight-item{display:flex;gap:12px;align-items:flex-start}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.insight-text strong{font-size:13px;color:#1a202c;display:block;margin-bottom:3px}
+.insight-text p{font-size:12px;color:#4a5568;line-height:1.65}
+
+.legend-box{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#4a5568}
+.legend-bar{width:16px;height:12px;border-radius:2px;opacity:.8}
+.legend-line{width:20px;height:3px;border-radius:2px}
+
+.recovery-bar{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #edf2f7}
+.recovery-bar:last-child{border-bottom:none}
+.rb-label{font-size:12px;color:#4a5568;width:90px;flex-shrink:0}
+.rb-track{flex:1;background:#edf2f7;border-radius:4px;height:18px;position:relative;overflow:hidden}
+.rb-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:11px;font-weight:600;color:#fff;transition:width .3s}
+.rb-val{font-size:12px;color:#4a5568;width:50px;text-align:right;flex-shrink:0}
+
+.footer{text-align:center;font-size:11px;color:#a0aec0;margin-top:40px}
+.section-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#e94560;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- Header -->
+<div class="header">
+  <div class="header-tag">客服数据分析报告 · 公关事件专项</div>
+  <h1>媒体报道事件 — 全渠道影响分析</h1>
+  <div class="header-sub">本月两次峰值事件：5/14 W8 税务认证批量邮件（149,060封）引发合规咨询潮；5/22 媒体报道触发全渠道关于moomoo 咨询异常及溢出效应</div>
+  <div class="header-meta">
+    <span>数据周期：<strong>2026年5月1日 — 5月25日</strong></span>
+    <span>数据来源：<strong>灯塔 · 在线咨询卡片 + 工单系统（全渠道）</strong></span>
+    <span>更新日期：<strong>2026年5月26日</strong></span>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi red">
+    <div class="kpi-label">事件日在线峰值</div>
+    <div class="kpi-value">822</div>
+    <div class="kpi-sub">5/22，vs 工作日基准 296（+177%）</div>
+  </div>
+  <div class="kpi orange">
+    <div class="kpi-label">媒体咨询峰值占比</div>
+    <div class="kpi-value">37.6%</div>
+    <div class="kpi-sub">关于moomoo 309单，占当日在线总量</div>
+  </div>
+  <div class="kpi purple">
+    <div class="kpi-label">登录相关涨幅</div>
+    <div class="kpi-value">+688%</div>
+    <div class="kpi-sub">最强焦虑信号，次日仍高位（44单）</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">影响持续天数</div>
+    <div class="kpi-value">4天+</div>
+    <div class="kpi-sub">5/25 美股休市全天仍有 124 单 moomoo（占比 29%）</div>
+  </div>
+  <div class="kpi" style="border-top-color:#f59e0b">
+    <div class="kpi-label">5/14 W8 税务认证邮件</div>
+    <div class="kpi-value">149,060</div>
+    <div class="kpi-sub">批量邮件触发在线 +67%、工单 +90% 的前期峰值</div>
+  </div>
+</div>
+
+<!-- Main chart -->
+<div class="card">
+  <div class="card-title">5月全月每日工单走势 — 在线渠道 & 工单系统</div>
+  <div class="card-desc">堆叠柱：在线渠道（关于moomoo / 其他）；折线：工单系统（电话+邮件）；红色虚线标注两次异常峰值日</div>
+  <div class="legend-box">
+    <div class="legend-item"><div class="legend-bar" style="background:#e94560"></div>在线·关于moomoo</div>
+    <div class="legend-item"><div class="legend-bar" style="background:#2e75b6"></div>在线·其他业务</div>
+    <div class="legend-item"><div class="legend-line" style="background:#e67e22"></div>工单系统（电话/邮件）</div>
+    <div class="legend-item"><div class="legend-line" style="background:#718096;border-top:2px dashed #718096;height:0"></div>工作日基准</div>
+  </div>
+  <div style="position:relative;height:340px">
+    <canvas id="mainChart"></canvas>
+  </div>
+</div>
+
+<!-- Category impact + Recovery -->
+<div class="two-col">
+  <div class="card">
+    <div class="card-title">5/22 各业务分类影响 — 在线渠道（vs 工作日基准）</div>
+    <div class="card-desc">基准 = 5/1—5/21 工作日均值（排除5/14异常日）</div>
+    <div style="position:relative;height:280px">
+      <canvas id="catChart"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">关键洞察</div>
+    <div class="card-desc">事件驱动的业务发现</div>
+    <div class="insight-list">
+      <div class="insight-item">
+        <div class="dot" style="background:#e94560"></div>
+        <div class="insight-text">
+          <strong>登录焦虑是最强指标</strong>
+          <p>登录相关 +688%，账户被锁 +243%。用户看到报道后第一反应是登录查账，次日（5/23）登录咨询甚至更高（44 vs 42）。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#e67e22"></div>
+        <div class="insight-text">
+          <strong>转仓双向激增，销户询问>执行</strong>
+          <p>转入 +800%、转出 +264%。电话/邮件渠道销户 +52%、转仓 +109%，但次日快速回落，实际流失有限。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#7e3af2"></div>
+        <div class="insight-text">
+          <strong>周末冲击远超历史水平</strong>
+          <p>5/23（周六）在线 567，是周末均值（169）的 3.4 倍，媒体情绪在非工作日持续扩散。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#f59e0b"></div>
+        <div class="insight-text">
+          <strong>5/14 W8 税务认证邮件引发前期峰值</strong>
+          <p>批量发送 149,060 封 W8 税务认证邮件，触发大量客户主动咨询，在线 +67%、工单 +90%，影响持续至 5/15。与5/22媒体事件性质不同，属合规主动触达。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#27ae60"></div>
+        <div class="insight-text">
+          <strong>5/25 美股休市（Memorial Day）</strong>
+          <p>在线 423 单中 moomoo 类仍有 124 单（占比 29%），但交易/入金/出金类咨询自然归零属休市正常现象。媒体类工单当日仍维持一定量，说明危机余波尚未完全消退。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sub-category breakdown -->
+<div class="card">
+  <div class="card-title">在线渠道 — 受影响分类二级拆解</div>
+  <div class="card-desc">基准 = 5/19—5/21 均值（事件前3个工作日）；高亮行为涨幅显著的子类</div>
+  <table>
+    <thead>
+      <tr><th>一级分类</th><th>二级分类</th><th>基准均值</th><th>5/22</th><th>5/23</th><th>5/24</th><th>涨幅(5/22)</th><th>解读</th></tr>
+    </thead>
+    <tbody>
+      <tr class="event-row"><td rowspan="3">关于moomoo</td><td>媒体报道/公关事件</td><td>0</td><td>302</td><td>156</td><td>95</td><td><span class="badge b-red">new</span></td><td style="text-align:left">直接触发源，3天衰减至正常</td></tr>
+      <tr class="event-row"><td>CRS</td><td>0</td><td>6</td><td>4</td><td>13</td><td><span class="badge b-red">new</span></td><td style="text-align:left">—</td></tr>
+      <tr class="event-row"><td>联系moomoo</td><td>0</td><td>1</td><td>1</td><td>0</td><td><span class="badge b-red">new</span></td><td style="text-align:left">—</td></tr>
+      <tr class="event-row"><td rowspan="2">平台基础体验</td><td><strong>登录相关</strong></td><td>5.3</td><td><strong>42</strong></td><td><strong>44</strong></td><td>26</td><td><span class="badge b-red">+688%</span></td><td style="text-align:left">核心焦虑信号，次日更高</td></tr>
+      <tr><td>通用设置</td><td>2.3</td><td>5</td><td>2</td><td>2</td><td><span class="badge b-orange">+114%</span></td><td style="text-align:left">—</td></tr>
+      <tr class="event-row"><td rowspan="2">转仓（在线）</td><td><strong>转入操作</strong></td><td>4.0</td><td><strong>36</strong></td><td>17</td><td>9</td><td><span class="badge b-red">+800%</span></td><td style="text-align:left">本在办 + 情绪加速</td></tr>
+      <tr><td>转出操作</td><td>4.7</td><td>17</td><td>15</td><td>2</td><td><span class="badge b-orange">+264%</span></td><td style="text-align:left">用户欲离场询问</td></tr>
+      <tr><td rowspan="2">开户后咨询</td><td><strong>查询账户资料</strong></td><td>6.0</td><td><strong>21</strong></td><td>9</td><td>11</td><td><span class="badge b-orange">+250%</span></td><td style="text-align:left">核查账户安全</td></tr>
+      <tr><td>账户被锁</td><td>2.3</td><td>8</td><td>4</td><td>1</td><td><span class="badge b-orange">+243%</span></td><td style="text-align:left">频繁登录触发锁定</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Work order + Channel comparison -->
+<div class="two-col">
+  <div class="card">
+    <div class="card-title">工单系统（电话/邮件）— 重点分类恢复曲线</div>
+    <div class="card-desc">基准 = 5/19—5/21 工作日均值；销户/转仓1—2天快速回落</div>
+    <div style="position:relative;height:240px">
+      <canvas id="woChart"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">渠道对比 — 事件冲击强度</div>
+    <div class="card-desc">在线渠道受冲击幅度远大于电话/邮件</div>
+    <div style="margin-top:8px">
+      <p style="font-size:12px;color:#718096;margin-bottom:12px">5/22 vs 各自基准涨幅</p>
+
+      <div class="recovery-bar">
+        <div class="rb-label">在线渠道</div>
+        <div class="rb-track"><div class="rb-fill" style="width:80%;background:#e94560">+177%</div></div>
+        <div class="rb-val">822单</div>
+      </div>
+      <div class="recovery-bar">
+        <div class="rb-label">电话/邮件</div>
+        <div class="rb-track"><div class="rb-fill" style="width:25%;background:#e67e22">+45%</div></div>
+        <div class="rb-val">393单</div>
+      </div>
+
+      <p style="font-size:12px;color:#718096;margin:20px 0 12px">5/23（周六）vs 周末基准</p>
+      <div class="recovery-bar">
+        <div class="rb-label">在线（周六）</div>
+        <div class="rb-track"><div class="rb-fill" style="width:90%;background:#e94560">+236%</div></div>
+        <div class="rb-val">567单</div>
+      </div>
+      <div class="recovery-bar">
+        <div class="rb-label">电话/邮件</div>
+        <div class="rb-track"><div class="rb-fill" style="width:18%;background:#e67e22">+26%</div></div>
+        <div class="rb-val">184单</div>
+      </div>
+
+      <p style="font-size:12px;color:#718096;margin:20px 0 12px">事件销户/转仓 — 询问 vs 实际执行判断</p>
+      <div class="recovery-bar">
+        <div class="rb-label">销户询问</div>
+        <div class="rb-track"><div class="rb-fill" style="width:70%;background:#718096">次日回落-55%</div></div>
+        <div class="rb-val">情绪性</div>
+      </div>
+      <div class="recovery-bar">
+        <div class="rb-label">转仓工单</div>
+        <div class="rb-track"><div class="rb-fill" style="width:85%;background:#718096">2天回落-84%</div></div>
+        <div class="rb-val">情绪性</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Daily detail table -->
+<div class="card">
+  <div class="card-title">5月全月每日明细</div>
+  <div class="card-desc">在线渠道含 关于moomoo 工单分拆；⚠ = 异常高位；❓ = 数据疑似不完整</div>
+  <table>
+    <thead>
+      <tr><th>日期</th><th>周</th><th>在线合计</th><th>其中moomoo</th><th>moomoo占比</th><th>在线偏差</th><th>工单系统</th><th>工单偏差</th><th>备注</th></tr>
+    </thead>
+    <tbody id="dailyTable"></tbody>
+  </table>
+</div>
+
+<!-- Satisfaction -->
+<div class="card">
+  <div class="section-label">质量指标</div>
+  <div class="card-title">每日满意度趋势 — 事件期间反向上扬</div>
+  <div class="card-desc">满意度 = (有评价工单 - 不满意工单) / 有评价工单；基准均值 82.9%（5/1–5/21 工作日，排除 5/14）</div>
+  <div class="legend-box">
+    <div class="legend-item"><div class="legend-bar" style="background:rgba(126,58,242,0.7)"></div>每日满意度</div>
+    <div class="legend-item"><div class="legend-line" style="background:#e94560;height:2px;border-top:2px dashed #e94560"></div>基准线 82.9%</div>
+  </div>
+  <div style="position:relative;height:240px"><canvas id="satChart"></canvas></div>
+</div>
+
+<div class="two-col">
+  <!-- Category sat table -->
+  <div class="card">
+    <div class="card-title">分类满意度 — 基准 vs 5/22 事件日</div>
+    <div class="card-desc">仅显示 5/22 工单量 ≥ 10 的分类；↑ 上升 ↓ 下降</div>
+    <table>
+      <thead><tr><th>一级分类</th><th>基准均值</th><th>5/22 满意度</th><th>变化</th><th>5/22 量</th></tr></thead>
+      <tbody>
+        <tr><td>关于moomoo</td><td>100.0%</td><td>100.0%</td><td><span class="badge b-green">±0pp</span></td><td>309</td></tr>
+        <tr class="event-row"><td>交易</td><td>94.6%</td><td>83.3%</td><td><span class="badge b-red">-11.3pp ↓</span></td><td>99</td></tr>
+        <tr><td>开户后咨询</td><td>78.3%</td><td>100.0%</td><td><span class="badge b-green">+21.7pp ↑</span></td><td>69</td></tr>
+        <tr><td>转仓</td><td>86.7%</td><td>90.0%</td><td><span class="badge b-green">+3.3pp ↑</span></td><td>56</td></tr>
+        <tr><td>开户前咨询</td><td>82.2%</td><td>85.7%</td><td><span class="badge b-green">+3.5pp ↑</span></td><td>55</td></tr>
+        <tr><td>平台基础体验</td><td>100.0%</td><td>100.0%</td><td><span class="badge b-green">±0pp</span></td><td>53</td></tr>
+        <tr><td>入金</td><td>73.6%</td><td>100.0%</td><td><span class="badge b-green">+26.4pp ↑</span></td><td>33</td></tr>
+        <tr><td>活动</td><td>81.9%</td><td>80.0%</td><td><span class="badge b-gray">-1.9pp</span></td><td>32</td></tr>
+        <tr class="total-row"><td>整体</td><td>82.9%</td><td>94.4%</td><td><span class="badge b-green">+11.5pp ↑</span></td><td>822</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sat insights -->
+  <div class="card">
+    <div class="card-title">满意度洞察</div>
+    <div class="card-desc">事件日满意度反升原因分析</div>
+    <div class="insight-list">
+      <div class="insight-item">
+        <div class="dot" style="background:#7e3af2"></div>
+        <div class="insight-text">
+          <strong>事件日整体满意度创月内新高（94.4%）</strong>
+          <p>关于moomoo 咨询以信息性询问为主，客服团队有官方话术支撑，应答简洁明确，客户获得答复后满意度高。309 单中满意度达 100%。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#e94560"></div>
+        <div class="insight-text">
+          <strong>交易类满意度下滑 -11.3pp（唯一显著下降分类）</strong>
+          <p>事件期间部分客户情绪紧张，交易相关问题复杂度上升（期权 +121%、融资融券 +100%），处理难度增加导致满意度下滑。</p>
+        </div>
+      </div>
+      <div class="insight-item">
+        <div class="dot" style="background:#27ae60"></div>
+        <div class="insight-text">
+          <strong>量升质不降，印证团队应急响应能力</strong>
+          <p>在线量较基准峰值 +177% 的情况下，满意度不降反升 +11.5pp。说明团队有效消化了信息性咨询，客户诉求基本得到一次性满足。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Management Analysis -->
+<div class="card">
+  <div class="section-label">管理层分析</div>
+  <div class="card-title">运营效能 — AHT 与接通等待分析</div>
+  <div class="card-desc">事件窗口 5/22–5/25；AHT 基准 = 5/1–5/21 工作日均值（排除5/14）；<10s接通率基准 = 98%</div>
+  <div class="two-col" style="margin-bottom:0">
+    <div style="position:relative;height:240px"><canvas id="ahtChart"></canvas></div>
+    <div style="position:relative;height:240px"><canvas id="waitChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Management KPIs -->
+<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px">
+  <div class="kpi orange">
+    <div class="kpi-label">超额进线量（4天）</div>
+    <div class="kpi-value">1,251</div>
+    <div class="kpi-sub">705 moomoo直接 + 546 溢出其他业务</div>
+  </div>
+  <div class="kpi red">
+    <div class="kpi-label">5/22 等待>10s 额外客户</div>
+    <div class="kpi-value">~205</div>
+    <div class="kpi-sub">接通率 73%（vs 基准 98%），当日额外排队约 205 人</div>
+  </div>
+  <div class="kpi" style="border-top-color:#7e3af2">
+    <div class="kpi-label">额外客服工时（4天）</div>
+    <div class="kpi-value">~209h</div>
+    <div class="kpi-sub">按事件窗口超额工单量 × AHT 折算</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">AHT 变化（事件日 vs 基准）</div>
+    <div class="kpi-value">-0.9min</div>
+    <div class="kpi-sub">5/22 实际 10.1 min，moomoo 单处理更简洁</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:24px">
+  <div class="card-title">管理层关键结论</div>
+  <div class="card-desc">基于 AHT、等待时长与超额工时数据</div>
+  <div class="insight-list">
+    <div class="insight-item">
+      <div class="dot" style="background:#e94560"></div>
+      <div class="insight-text">
+        <strong>SLA 压力集中在 5/22 接入层（非处理质量）</strong>
+        <p>5/22 &lt;10s接通率从基准 98% 骤降至 73%，约 205 名客户等待超 10 秒。主因是 moomoo 咨询集中涌入，排队峰值未充分预警。5/23 回升至 84%，5/24 恢复基准，说明问题为一过性冲击而非系统性瓶颈。</p>
+      </div>
+    </div>
+    <div class="insight-item">
+      <div class="dot" style="background:#27ae60"></div>
+      <div class="insight-text">
+        <strong>团队效率悖论：量 ×2.8，AHT 反降，满意度新高</strong>
+        <p>事件日在线量是基准 2.8 倍，但 AHT 由 11.0 min 降至 10.1 min（−0.9 min），因 moomoo 咨询属信息性询问，话术简洁、处理快。团队在高压下未出现质量滑坡，满意度达全月最高 94.4%，显示应急响应规程有效。</p>
+      </div>
+    </div>
+    <div class="insight-item">
+      <div class="dot" style="background:#e67e22"></div>
+      <div class="insight-text">
+        <strong>4天累计额外工时约 209 小时，需纳入排班成本核算</strong>
+        <p>5/22–5/25 超额进线 1,251 单（moomoo 705 单 + 业务溢出 546 单），按平均 AHT 10 min 折算约需 209 人·时。若未安排应急增援，实际由常规排班吸收，存在隐性疲劳风险，建议在突发事件预案中设置弹性增援触发阈值（如日在线量超基准 +50%）。</p>
+      </div>
+    </div>
+    <div class="insight-item">
+      <div class="dot" style="background:#7e3af2"></div>
+      <div class="insight-text">
+        <strong>溢出效应不可忽视：546 单非媒体业务在事件期间异常上升</strong>
+        <p>扣除直接 moomoo 咨询后，5/22 其他业务仍超基准 +81%（513 vs 283 基准）。转仓、登录、开户类咨询同步放大，系同一客群情绪驱动，非独立需求激增。预案设计应覆盖全业务条线，而非仅针对媒体话题本身。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recommendations -->
+<div class="card">
+  <div class="card-title">应对建议</div>
+  <div class="card-desc">基于本次事件数据驱动的改进方向</div>
+  <div class="three-col" style="margin-bottom:0">
+    <div style="padding:16px;background:#fff5f5;border-radius:10px;border-left:4px solid #e94560">
+      <div style="font-size:12px;font-weight:700;color:#c0392b;margin-bottom:8px">事件后1小时内</div>
+      <div style="font-size:12px;color:#4a5568;line-height:1.7">
+        在线渠道置顶官方声明 / 快速 FAQ<br>
+        预计可吸收 30–40% 重复咨询（登录/查账类）
+      </div>
+    </div>
+    <div style="padding:16px;background:#fff8e1;border-radius:10px;border-left:4px solid #e67e22">
+      <div style="font-size:12px;font-weight:700;color:#c0392b;margin-bottom:8px">人力预备</div>
+      <div style="font-size:12px;color:#4a5568;line-height:1.7">
+        在线组增援优先级 > 电话/邮件<br>
+        预备转仓/销户专线话术，事件48小时内有效
+      </div>
+    </div>
+    <div style="padding:16px;background:#f0fff4;border-radius:10px;border-left:4px solid #27ae60">
+      <div style="font-size:12px;font-weight:700;color:#065f46;margin-bottom:8px">事后监测</div>
+      <div style="font-size:12px;color:#4a5568;line-height:1.7">
+        持续跟踪销户/转出执行量（vs 询问量）<br>
+        3天后若未恢复基准，评估二次传播风险
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">本报告由灯塔数据自动生成 · 仅供内部参考 · 2026-05-26</div>
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+const labels = ['5/1','5/2','5/3','5/4','5/5','5/6','5/7','5/8','5/9','5/10',
+                 '5/11','5/12','5/13','5/14','5/15','5/16','5/17','5/18','5/19',
+                 '5/20','5/21','5/22','5/23','5/24','5/25'];
+const dates  = ['2026-05-01','2026-05-02','2026-05-03','2026-05-04','2026-05-05',
+                 '2026-05-06','2026-05-07','2026-05-08','2026-05-09','2026-05-10',
+                 '2026-05-11','2026-05-12','2026-05-13','2026-05-14','2026-05-15',
+                 '2026-05-16','2026-05-17','2026-05-18','2026-05-19','2026-05-20',
+                 '2026-05-21','2026-05-22','2026-05-23','2026-05-24','2026-05-25'];
+const wdays  = ['五','六','日','一','二','三','四','五','六','日','一','二','三','四',
+                 '五','六','日','一','二','三','四','五','六','日','一'];
+
+const onlineTotal = [262,204,109,173,227,310,321,321,248,132,273,373,371,494,378,207,114,239,274,315,312,822,567,369,423];
+const moomooD    = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,309,162,110,124];
+const otherOnline = onlineTotal.map((v,i)=>v-moomooD[i]);
+const woTotal    = [271,175,138,180,262,298,293,247,119,99,216,274,263,513,389,190,158,241,302,278,274,393,184,134,188];
+
+const WD_BASE_OL = 296, WE_BASE_OL = 169;
+const WD_BASE_WO = 271, WE_BASE_WO = 146;
+const isWeekend  = [false,true,true,false,false,false,false,false,true,true,
+                    false,false,false,false,false,true,true,false,false,false,
+                    false,false,true,true,false];
+
+// ── Main Chart ────────────────────────────────────────────────────────────────
+const ctx1 = document.getElementById('mainChart').getContext('2d');
+new Chart(ctx1, {
+  data:{
+    labels,
+    datasets:[
+      {type:'bar',label:'在线·关于moomoo',data:moomooD,
+       backgroundColor:'rgba(233,69,96,0.85)',yAxisID:'y',order:3,stack:'ol'},
+      {type:'bar',label:'在线·其他业务',data:otherOnline,
+       backgroundColor:'rgba(46,117,182,0.7)',yAxisID:'y',order:4,stack:'ol'},
+      {type:'line',label:'工单系统（电话/邮件）',data:woTotal,
+       borderColor:'#e67e22',backgroundColor:'rgba(230,126,34,0)',
+       borderWidth:2.5,pointRadius:3,fill:false,tension:0.3,yAxisID:'y',order:1,
+       pointBackgroundColor:woTotal.map((_,i)=>(i===13||i===21)?'#e67e22':'#f0a860')},
+      {type:'line',label:'工作日基准（在线）',
+       data:labels.map((_,i)=>isWeekend[i]?null:WD_BASE_OL),
+       borderColor:'rgba(113,128,150,0.5)',backgroundColor:'rgba(0,0,0,0)',
+       borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false,yAxisID:'y',order:2},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y?.toLocaleString() ?? '—'} 单`}},
+      annotation:{annotations:{
+        event22:{type:'line',xMin:21,xMax:21,borderColor:'rgba(233,69,96,0.6)',borderWidth:2,borderDash:[4,3],
+          label:{content:'5/22 媒体事件',display:true,position:'start',
+                 backgroundColor:'rgba(233,69,96,0.85)',color:'#fff',font:{size:10},padding:{x:4,y:2}}},
+        anomaly14:{type:'line',xMin:13,xMax:13,borderColor:'rgba(245,158,11,0.6)',borderWidth:1.5,borderDash:[4,3],
+          label:{content:'5/14 W8税务认证邮件 149,060封',display:true,position:'start',
+                 backgroundColor:'rgba(245,158,11,0.9)',color:'#fff',font:{size:10},padding:{x:4,y:2}}},
+      }}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:10}}},
+      y:{grid:{color:'#edf2f7'},ticks:{font:{size:10}},
+         title:{display:true,text:'工单量（单）',font:{size:11}}}
+    }
+  }
+});
+
+// ── Category Impact Chart ────────────────────────────────────────────────────
+const ctx2 = document.getElementById('catChart').getContext('2d');
+const catLabels = ['关于moomoo','平台基础体验','转仓','开户后咨询','交易','活动','入金','出金'];
+const catBase   = [2.7,11.3,12.7,38.7,67.3,21.7,36.0,19.7];
+const cat522    = [309,53,56,69,98,32,34,19];
+new Chart(ctx2,{
+  type:'bar',
+  data:{
+    labels:catLabels,
+    datasets:[
+      {label:'工作日基准',data:catBase,backgroundColor:'rgba(46,117,182,0.3)',borderRadius:3},
+      {label:'5/22实际',data:cat522,
+       backgroundColor:cat522.map((_,i)=>i===0?'rgba(233,69,96,0.8)':i<3?'rgba(230,126,34,0.75)':'rgba(100,160,220,0.7)'),
+       borderRadius:3},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'top',labels:{font:{size:11},boxWidth:12}},
+      tooltip:{callbacks:{
+        afterLabel:(c)=>c.datasetIndex===1?`较基准 ${((c.parsed.y-catBase[c.dataIndex])/catBase[c.dataIndex]*100).toFixed(0)}%`:''
+      }}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:10}}},
+      y:{grid:{color:'#edf2f7'},ticks:{font:{size:10}}}
+    }
+  }
+});
+
+// ── Work Order Recovery Chart ────────────────────────────────────────────────
+const ctx3 = document.getElementById('woChart').getContext('2d');
+new Chart(ctx3,{
+  type:'line',
+  data:{
+    labels:['基准均值','5/22','5/23','5/24','5/25'],
+    datasets:[
+      {label:'销户',data:[67.7,103,46,40,18],borderColor:'#e94560',backgroundColor:'rgba(233,69,96,0.1)',
+       borderWidth:2,pointRadius:4,fill:true,tension:0.3},
+      {label:'转仓',data:[30.7,64,37,10,6],borderColor:'#7e3af2',backgroundColor:'rgba(126,58,242,0.08)',
+       borderWidth:2,pointRadius:4,fill:true,tension:0.3},
+      {label:'入金',data:[7.7,23,2,1,0],borderColor:'#27ae60',backgroundColor:'rgba(39,174,96,0.08)',
+       borderWidth:2,pointRadius:4,fill:false,tension:0.3},
+      {label:'客户体验回访',data:[6.0,21,3,1,0],borderColor:'#e67e22',backgroundColor:'rgba(0,0,0,0)',
+       borderWidth:2,pointRadius:4,fill:false,tension:0.3,borderDash:[4,2]},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:10}}},
+      y:{grid:{color:'#edf2f7'},ticks:{font:{size:10}}}
+    }
+  }
+});
+
+// ── Satisfaction Chart ────────────────────────────────────────────────────────
+const ctx4 = document.getElementById('satChart').getContext('2d');
+const dailySat = [0.857,0.761,0.765,0.759,0.804,0.833,0.817,0.851,0.918,0.807,
+                  0.909,0.822,0.923,0.840,0.833,0.844,0.714,0.840,0.903,0.776,
+                  0.836,0.944,0.870,0.929,0.898];
+const SAT_BASE = 0.829;
+new Chart(ctx4, {
+  type:'line',
+  data:{
+    labels,
+    datasets:[
+      {label:'每日满意度',data:dailySat.map(v=>+(v*100).toFixed(1)),
+       borderColor:'rgba(126,58,242,0.9)',backgroundColor:'rgba(126,58,242,0.08)',
+       borderWidth:2,pointRadius:dailySat.map((_,i)=>i>=21?6:3),
+       pointBackgroundColor:dailySat.map((v,i)=>i===21?'#e94560':v>=0.9?'#27ae60':v<0.77?'#e94560':'rgba(126,58,242,0.9)'),
+       fill:true,tension:0.3,yAxisID:'y'},
+      {label:'基准线 82.9%',data:labels.map(()=>82.9),
+       borderColor:'rgba(233,69,96,0.5)',backgroundColor:'rgba(0,0,0,0)',
+       borderWidth:1.5,borderDash:[6,4],pointRadius:0,yAxisID:'y'},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}%`}},
+      annotation:{annotations:{
+        ev22s:{type:'line',xMin:21,xMax:21,borderColor:'rgba(233,69,96,0.4)',borderWidth:1.5,borderDash:[4,3],
+          label:{content:'5/22 ▲94.4%',display:true,position:'end',
+                 backgroundColor:'rgba(233,69,96,0.8)',color:'#fff',font:{size:10},padding:{x:4,y:2}}},
+        w8s:{type:'line',xMin:13,xMax:13,borderColor:'rgba(245,158,11,0.4)',borderWidth:1,borderDash:[4,3],
+          label:{content:'5/14 W8 84.0%',display:true,position:'end',
+                 backgroundColor:'rgba(245,158,11,0.8)',color:'#fff',font:{size:10},padding:{x:4,y:2}}},
+      }}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:10}}},
+      y:{min:65,max:100,grid:{color:'#edf2f7'},ticks:{font:{size:10},callback:v=>v+'%'},
+         title:{display:true,text:'满意度',font:{size:11}}}
+    }
+  }
+});
+
+// ── AHT Chart ────────────────────────────────────────────────────────────────
+const ctx5 = document.getElementById('ahtChart').getContext('2d');
+new Chart(ctx5, {
+  type:'bar',
+  data:{
+    labels:['基准均值','5/22（周五）','5/23（周六）','5/24（周日）','5/25（Memorial Day）'],
+    datasets:[
+      {type:'bar',label:'AHT（分钟）',
+       data:[11.0,10.1,10.2,9.3,10.3],
+       backgroundColor:['rgba(46,117,182,0.4)','rgba(233,69,96,0.75)','rgba(233,69,96,0.6)','rgba(233,69,96,0.5)','rgba(233,69,96,0.4)'],
+       borderRadius:4,yAxisID:'y'},
+      {type:'line',label:'基准线 11.0 min',
+       data:[11.0,11.0,11.0,11.0,11.0],
+       borderColor:'rgba(113,128,150,0.6)',backgroundColor:'rgba(0,0,0,0)',
+       borderWidth:1.5,borderDash:[6,4],pointRadius:0,yAxisID:'y'},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'top',labels:{font:{size:10},boxWidth:12}},
+      title:{display:true,text:'平均处理时长 AHT（分钟）',font:{size:11},color:'#0f2d52'},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y} min`}}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:9}}},
+      y:{min:8,max:13,grid:{color:'#edf2f7'},ticks:{font:{size:10},callback:v=>v+'m'},
+         title:{display:true,text:'分钟',font:{size:10}}}
+    }
+  }
+});
+
+// ── Wait Time Chart ───────────────────────────────────────────────────────────
+const ctx6 = document.getElementById('waitChart').getContext('2d');
+new Chart(ctx6, {
+  type:'bar',
+  data:{
+    labels:['基准均值','5/22（周五）','5/23（周六）','5/24（周日）','5/25（Memorial Day）'],
+    datasets:[
+      {type:'bar',label:'<10s接通率',
+       data:[98,73,84,98,95],
+       backgroundColor:['rgba(39,174,96,0.5)','rgba(233,69,96,0.8)','rgba(230,126,34,0.7)','rgba(39,174,96,0.5)','rgba(39,174,96,0.45)'],
+       borderRadius:4,yAxisID:'y'},
+      {type:'line',label:'基准线 98%',
+       data:[98,98,98,98,98],
+       borderColor:'rgba(113,128,150,0.6)',backgroundColor:'rgba(0,0,0,0)',
+       borderWidth:1.5,borderDash:[6,4],pointRadius:0,yAxisID:'y'},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'top',labels:{font:{size:10},boxWidth:12}},
+      title:{display:true,text:'10秒内接通率（%）',font:{size:11},color:'#0f2d52'},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}%`}}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:9}}},
+      y:{min:60,max:105,grid:{color:'#edf2f7'},ticks:{font:{size:10},callback:v=>v+'%'},
+         title:{display:true,text:'接通率',font:{size:10}}}
+    }
+  }
+});
+
+// ── Daily Table ───────────────────────────────────────────────────────────────
+const tbody = document.getElementById('dailyTable');
+const WD_BL_OL=296, WE_BL_OL=169, WD_BL_WO=271, WE_BL_WO=146;
+dates.forEach((date,i)=>{
+  const tr=document.createElement('tr');
+  const we=isWeekend[i];
+  const blOl=we?WE_BL_OL:WD_BL_OL, blWo=we?WE_BL_WO:WD_BL_WO;
+  const ol=onlineTotal[i], wo=woTotal[i], mm=moomooD[i];
+  const olDev=(ol-blOl)/blOl*100, woDev=(wo-blWo)/blWo*100;
+  const mmPct=ol>0&&mm>0?(mm/ol*100).toFixed(1)+'%':'—';
+  const olDevStr=`${olDev>0?'+':''}${olDev.toFixed(0)}%`;
+  const woDevStr=`${woDev>0?'+':''}${woDev.toFixed(0)}%`;
+  const olColor=olDev>50?'#c0392b':olDev>20?'#e67e22':olDev<-20?'#718096':'#2d3748';
+  const woColor=woDev>50?'#c0392b':woDev>20?'#e67e22':woDev<-20?'#718096':'#2d3748';
+
+  let note='', rowClass='';
+  if(date==='2026-05-14'){note='⚠ W8 税务认证邮件 149,060 封';rowClass='anomaly-row';}
+  else if(date==='2026-05-22'){note='◀ 媒体报道事件爆发';rowClass='event-row';}
+  else if(date==='2026-05-23'){note='↘ 持续影响（周六）';rowClass='event-row';}
+  else if(date==='2026-05-24'){note='↘ 持续影响（周日）';rowClass='event-row';}
+  else if(date==='2026-05-25'){note='美股休市（Memorial Day）';}
+
+  if(rowClass)tr.className=rowClass;
+  tr.innerHTML=`
+    <td>${date}</td>
+    <td>${wdays[i]}</td>
+    <td>${ol.toLocaleString()}</td>
+    <td>${mm||'—'}</td>
+    <td>${mmPct}</td>
+    <td style="color:${olColor};font-weight:${Math.abs(olDev)>30?'700':'400'}">${olDevStr}</td>
+    <td>${wo.toLocaleString()}</td>
+    <td style="color:${woColor};font-weight:${Math.abs(woDev)>30?'700':'400'}">${woDevStr}</td>
+    <td style="text-align:left;font-size:12px;color:#4a5568">${note}</td>`;
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
